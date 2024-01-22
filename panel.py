@@ -174,8 +174,6 @@ class TEST_OT_test_op(Operator):
         rand_int = random.randint(0, len(avaliable_list)-1)
         rand_obj = avaliable_list[rand_int]
         self.car_meshes[rand_obj] = False
-        bpy.context.object.hide_viewport = True
-        # print(f'RANDOM TO H*IDE***** {rand_obj}')
         return rand_obj
 
     @staticmethod
@@ -187,7 +185,6 @@ class TEST_OT_test_op(Operator):
         for i in range(one_third):
             temp = self.get_random_car_part()
             self.object_to_hide.append(temp)
-            # print(temp)
             bpy.data.objects[temp].hide_viewport = True
         t_end = time.time()
         print(f'Hide random one/third: {t_end - t_start}')
