@@ -1,4 +1,4 @@
-import glob, sys, time, math, random, asyncio, bpy
+import glob, sys, time, math, random, asyncio, bpy, os
 from bpy.props import EnumProperty
 from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
@@ -49,7 +49,7 @@ class TEST_OT_test_op(Operator):
             _obj = bpy.context.object
             self.diffMate(context, _obj)
         elif self.action == 'ABC_IMPORT':
-            self.abc_import(context)
+            self.abc_import_synconus(context)
         return {'FINISHED'}
  
     @staticmethod
@@ -165,17 +165,33 @@ class TEST_OT_test_op(Operator):
             cube.active_material = material_basic
     
     @staticmethod
-    def abc_import(context):
+    def abc_import_synconus(context):
         # print('Start')
         abc_list = list(glob.glob("D:\\alembicCar\\*"))
         # print('Globbed')
         print(abc_list[0])
         # print('First')
         # bpy.ops.wm.alembic_import(filepath=abc_list[0], relative_path=True, as_background_job=True)
+        # obj = bpy.ops.wm.alembic_import(filepath=abc_list[0], relative_path=True, as_background_job=False)
+        # temp_name = os.path.basename(abc_list[0])
+        # print(f'Temp name: {temp_name}')
+        # print(f'Object: {obj}')
+        # print(f'Objec name: {obj.name}')
+        t_start = time.time()
         for n in abc_list:
-            print(f'Importing: {n}')
-            bpy.ops.wm.alembic_import(filepath=n, relative_path=True, as_background_job=False)
-        pass
+            # print(f'Importing: {n}')
+            
+            t = bpy.ops.wm.alembic_import(filepath=n, relative_path=True, as_background_job=False)
+            try:
+                tem_name = os.path.basename(n)
+                obj = bpy.context.object
+                obj.name = tem_name
+            except:
+                print('Missing mesh')
+        t_end = time.time()
+
+        print(f'Total importing time: {t_end - t_start}')
+        
 
 
 class Test_Panel(bpy.types.Panel):
