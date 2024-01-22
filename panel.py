@@ -21,8 +21,6 @@ class TEST_OT_test_op(Operator):
         items=[
             ('ADD_CUBE', 'add cube', 'add cube'),
             ('REMOVE_CUBE', 'remove object', 'remove object'),
-            ('CHANGE_MATERIAL', 'change material', 'change material'),
-            ('HIDE_CUBE', 'hide object', 'hide object'),
             ("RANDOM_MOVE", 'move object', 'move object'),
             ("DIFF_MATERIAL", 'diff mat', 'diff mat'),
             ("ABC_IMPORT", 'abc import', 'abc import'),
@@ -30,6 +28,7 @@ class TEST_OT_test_op(Operator):
             ("GET_ALL", 'get all', 'get all'),
             ("HIDE_RANDOM", 'hide random', 'hide random'),
             ("UNHIDE_RANDOM", 'unhide random', 'unhide random'),
+            ("SAVE_SCENE", 'save scene', 'save scene'),
     ]
 )
 
@@ -39,14 +38,6 @@ class TEST_OT_test_op(Operator):
         elif self.action == 'REMOVE_CUBE':
             _obj = bpy.context.selected_objects
             self.remove_object(context=context, obj_to_remove=_obj)
-        elif self.action == 'HIDE_CUBE':
-            print(f'Hide object BEFORE: {self.object_to_hide}')
-            _obj = bpy.context.selected_objects
-            self.hide_object(self, context, _obj)
-            print(f'Hide object AFTER: {self.object_to_hide}')
-        elif self.action == 'CHANGE_MATERIAL':
-            _obj = bpy.context.selected_objects
-            self.change_material(context, _obj)
         elif self.action == 'RANDOM_MOVE':
             _obj = bpy.context.selected_objects
             self.randomMove(context, _obj)
@@ -63,6 +54,8 @@ class TEST_OT_test_op(Operator):
             self.hide_random_third_of_car(self, context)
         elif self.action == 'UNHIDE_RANDOM':
             self.unhide_random_third_of_car(self, context)
+        elif self.action == 'SAVE_SCENE':
+            self.save_scene(context)
         return {'FINISHED'}
  
     @staticmethod
@@ -87,39 +80,6 @@ class TEST_OT_test_op(Operator):
         for obj in cube:
             obj.data.materials.append(new_mat)
  
-    @staticmethod
-    def change_material(context, cube):
-        if cube is None:
-            cube = bpy.context.selected_objects
-        if cube is not None:
-            new_mat = bpy.data.materials.new(name="Material")
-            new_mat.use_nodes = True
-            bsdf = new_mat.node_tree.nodes["Principled BSDF"]
-            color_ramp = new_mat.node_tree.nodes.new("ShaderNodeValToRGB")
-            r, g, b = random.randint(0, 50), random.randint(0, 50), random.randint(0, 50)
-            color_ramp.color_ramp.elements[0].color = (r, g, b, 1)
-            new_mat.node_tree.links.new(bsdf.inputs['Base Color'], color_ramp.outputs['Color'])
-
-            for obj in cube:
-                obj.data.materials[0] = new_mat
-        
-    @staticmethod
-    def hide_object(self, context, cube):
-        if cube is None or cube == []:
-            cube = bpy.context.selected_objects
-        if cube is not None:
-            hide = True
-            if cube == []:
-                cube = self.object_to_hide
-                print(f'Hided cube: {cube}')
-                hide = False
-            vis = hide
-            if vis:
-                self.object_to_hide.append(cube)
-            bpy.context.object.hide_viewport = vis
-            if vis:
-                self.object_to_hide.remove(cube)
-        return cube
     
     @staticmethod
     def randomMove(context, cube):
@@ -234,6 +194,8 @@ class TEST_OT_test_op(Operator):
         
     @staticmethod
     def unhide_random_third_of_car(self, context):
+        if len(self.car_meshes.items()) == 0:
+            self.get_all(context)
         t_start = time.time()
         for key, value in self.car_meshes.items():
             if not value:
@@ -243,6 +205,23 @@ class TEST_OT_test_op(Operator):
         t_end = time.time()
         print(f'Unhide random one/third: {t_end - t_start}')
         
+
+    @staticmethod
+    def save_scene(context, filepath = 'D:\BlenderAddons\Scenes\Test'):
+        t_start = time.time()
+
+        extension = '.blend'
+        filename = filepath
+        # print(f'File name: {filename}, extension: {extension} AAAAAAAAAAAAAAAAAAAAAA')
+        counter = 1
+        filepath = f'{filepath}{extension}'
+        while os.path.exists(filepath):
+            filepath = f'{filename}({counter}){extension}'
+            counter += 1
+
+        bpy.ops.wm.save_as_mainfile(filepath=f'{filepath}')
+        t_end = time.time()
+        print(f'Scene saved to: {filepath}, took: {t_end - t_start} sec')
         
 
 
@@ -263,23 +242,21 @@ class Test_Panel(bpy.types.Panel):
         row = layout.row()
         row.operator('test.test_op', text='Remove Cube').action = 'REMOVE_CUBE'
         row = layout.row()
-        row.operator('test.test_op', text='Hide Cube').action = 'HIDE_CUBE'
-        row = layout.row()
-        row.operator('test.test_op', text='Change Material').action = 'CHANGE_MATERIAL'
-        row = layout.row()
         row.operator('test.test_op', text='Move').action = 'RANDOM_MOVE'
         row = layout.row()
-        row.operator('test.test_op', text='Diff Mat').action = 'DIFF_MATERIAL'
+        row.operator('test.test_op', text='Random material').action = 'DIFF_MATERIAL'
         row = layout.row()
         row.operator('test.test_op', text='Import sync alembics').action = 'ABC_IMPORT'
         row = layout.row()
-        row.operator('test.test_op', text='Import async alembics').action = 'ABC_ASIMPORT'
+        row.operator('test.test_op', text='Import async alembics (NOT WORKING YET)').action = 'ABC_ASIMPORT'
         row = layout.row()
         row.operator('test.test_op', text='Get all').action = 'GET_ALL'
         row = layout.row()
         row.operator('test.test_op', text='Hide random').action = 'HIDE_RANDOM'
         row = layout.row()
-        row.operator('test.test_op', text='Unhide random').action = 'UNHIDE_RANDOM'
+        row.operator('test.test_op', text='Unhide all').action = 'UNHIDE_RANDOM'
+        row = layout.row()
+        row.operator('test.test_op', text='Save scene').action = 'SAVE_SCENE'
 
 
 def register():
