@@ -196,11 +196,14 @@ class TEST_OT_test_op(Operator):
                 print('Missing mesh')
 
     def get_all(self,context):
+        t_start = time.time()
         self.car_meshes.clear()
         for ob in bpy.data.objects:
-            print (ob.name)
-            print(f'Obj: {ob.name} is vis: {not bpy.data.objects[ob.name].hide_viewport}')
+            # print (ob.name)
+            # print(f'Obj: {ob.name} is vis: {not bpy.data.objects[ob.name].hide_viewport}')
             self.car_meshes[ob.name] = not bpy.data.objects[ob.name].hide_viewport
+        t_end = time.time()
+        print(f'Select all objects in scene: {t_end - t_start}')
 
     def get_random_car_part(self):
         avaliable_list = []
@@ -212,27 +215,33 @@ class TEST_OT_test_op(Operator):
         rand_obj = avaliable_list[rand_int]
         self.car_meshes[rand_obj] = False
         bpy.context.object.hide_viewport = True
-        print(f'RANDOM TO H*IDE***** {rand_obj}')
+        # print(f'RANDOM TO H*IDE***** {rand_obj}')
         return rand_obj
 
     @staticmethod
     def hide_random_third_of_car(self, context):
+        t_start = time.time()
         if len(self.object_to_hide) > 0:
             self.unhide_random_third_of_car(self, context)
         one_third = len(self.car_meshes) // 3
         for i in range(one_third):
             temp = self.get_random_car_part()
             self.object_to_hide.append(temp)
-            print(temp)
+            # print(temp)
             bpy.data.objects[temp].hide_viewport = True
+        t_end = time.time()
+        print(f'Hide random one/third: {t_end - t_start}')
         
     @staticmethod
     def unhide_random_third_of_car(self, context):
+        t_start = time.time()
         for key, value in self.car_meshes.items():
             if not value:
                 bpy.data.objects[key].hide_viewport = False
                 self.car_meshes[key] = True
         self.object_to_hide.clear()
+        t_end = time.time()
+        print(f'Unhide random one/third: {t_end - t_start}')
         
         
 
