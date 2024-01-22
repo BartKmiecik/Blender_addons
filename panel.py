@@ -15,7 +15,8 @@ class TEST_OT_test_op(Operator):
     bl_description = 'Test'
     bl_options = {'REGISTER', 'UNDO'}
 
-    hided_obj = []
+    object_to_hide = []
+    car_meshes = {}
     action: EnumProperty(
         items=[
             ('ADD_CUBE', 'add cube', 'add cube'),
@@ -24,7 +25,11 @@ class TEST_OT_test_op(Operator):
             ('HIDE_CUBE', 'hide object', 'hide object'),
             ("RANDOM_MOVE", 'move object', 'move object'),
             ("DIFF_MATERIAL", 'diff mat', 'diff mat'),
-            ("ABC_IMPORT", 'abc import', 'abc import')
+            ("ABC_IMPORT", 'abc import', 'abc import'),
+            ("ABC_ASIMPORT", 'abc asimport', 'abc asimport'),
+            ("GET_ALL", 'get all', 'get all'),
+            ("HIDE_RANDOM", 'hide random', 'hide random'),
+            ("UNHIDE_RANDOM", 'unhide random', 'unhide random'),
     ]
 )
 
@@ -35,10 +40,10 @@ class TEST_OT_test_op(Operator):
             _obj = bpy.context.selected_objects
             self.remove_object(context=context, obj_to_remove=_obj)
         elif self.action == 'HIDE_CUBE':
-            print(f'Hide object BEFORE: {self.hided_obj}')
+            print(f'Hide object BEFORE: {self.object_to_hide}')
             _obj = bpy.context.selected_objects
             self.hide_object(self, context, _obj)
-            print(f'Hide object AFTER: {self.hided_obj}')
+            print(f'Hide object AFTER: {self.object_to_hide}')
         elif self.action == 'CHANGE_MATERIAL':
             _obj = bpy.context.selected_objects
             self.change_material(context, _obj)
@@ -49,7 +54,15 @@ class TEST_OT_test_op(Operator):
             _obj = bpy.context.object
             self.diffMate(context, _obj)
         elif self.action == 'ABC_IMPORT':
-            self.abc_import_synconus(context)
+            self.abc_import_synconus(self, context)
+        elif self.action == 'ABC_ASIMPORT':
+            asyncio.run(self.abc_import_assync(context))
+        elif self.action == 'GET_ALL':
+            self.get_all(self)
+        elif self.action == 'HIDE_RANDOM':
+            self.hide_random_third_of_car(self, context)
+        elif self.action == 'UNHIDE_RANDOM':
+            self.unhide_random_third_of_car(self, context)
         return {'FINISHED'}
  
     @staticmethod
@@ -93,32 +106,19 @@ class TEST_OT_test_op(Operator):
     @staticmethod
     def hide_object(self, context, cube):
         if cube is None or cube == []:
-            # print(cube)
-            # print('BBBBBBBBBBB not cube')
             cube = bpy.context.selected_objects
-            # print(cube)
         if cube is not None:
-            # print('CCCCCCCCCCCCCC not cube')
-            # print(cube)
-            # print(f'Obje name: {cube[0].hide_viewport}')
             hide = True
             if cube == []:
-                # print(f'Empty cube: {cube} and hide obj: {self.hided_obj}')
-                cube = self.hided_obj
-                # print(f'Cube: {cube} and hide obj: {self.hided_obj}')
+                cube = self.object_to_hide
                 print(f'Hided cube: {cube}')
                 hide = False
             vis = hide
             if vis:
-                # print(f'Adding cube: {cube} to hide object')
-                self.hided_obj.append(cube)
-                # print(f'Hide object: {self.hided_obj}')
-            # print(f'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA {vis}')
+                self.object_to_hide.append(cube)
             bpy.context.object.hide_viewport = vis
             if vis:
-                self.hided_obj.remove(cube)
-            # vis = bpy.context.object.visible_in_viewport_get
-            # print(f'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA {vis}')
+                self.object_to_hide.remove(cube)
         return cube
     
     @staticmethod
@@ -165,32 +165,75 @@ class TEST_OT_test_op(Operator):
             cube.active_material = material_basic
     
     @staticmethod
-    def abc_import_synconus(context):
-        # print('Start')
+    def abc_import_synconus(self, context):
         abc_list = list(glob.glob("D:\\alembicCar\\*"))
-        # print('Globbed')
-        print(abc_list[0])
-        # print('First')
-        # bpy.ops.wm.alembic_import(filepath=abc_list[0], relative_path=True, as_background_job=True)
-        # obj = bpy.ops.wm.alembic_import(filepath=abc_list[0], relative_path=True, as_background_job=False)
-        # temp_name = os.path.basename(abc_list[0])
-        # print(f'Temp name: {temp_name}')
-        # print(f'Object: {obj}')
-        # print(f'Objec name: {obj.name}')
         t_start = time.time()
         for n in abc_list:
+            bpy.ops.wm.alembic_import(filepath=n, relative_path=True, as_background_job=False)
+            try:
+                tem_name = os.path.basename(n)
+                obj = bpy.context.object
+                obj.name = tem_name
+                self.car_meshes[obj] = True
+            except:
+                print('Missing mesh')
+        t_end = time.time()
+
+        print(f'Total importing time: {t_end - t_start}')
+
+    @staticmethod
+    async def abc_import_assync(context):
+        abc_list = list(glob.glob("D:\\alembicCar\\*"))
+        for n in abc_list:
             # print(f'Importing: {n}')
-            
-            t = bpy.ops.wm.alembic_import(filepath=n, relative_path=True, as_background_job=False)
+            batch = asyncio.gather(bpy.ops.wm.alembic_import(filepath=n, relative_path=True, as_background_job=True))
+            resu = await batch
             try:
                 tem_name = os.path.basename(n)
                 obj = bpy.context.object
                 obj.name = tem_name
             except:
                 print('Missing mesh')
-        t_end = time.time()
 
-        print(f'Total importing time: {t_end - t_start}')
+    def get_all(self,context):
+        self.car_meshes.clear()
+        for ob in bpy.data.objects:
+            print (ob.name)
+            print(f'Obj: {ob.name} is vis: {not bpy.data.objects[ob.name].hide_viewport}')
+            self.car_meshes[ob.name] = not bpy.data.objects[ob.name].hide_viewport
+
+    def get_random_car_part(self):
+        avaliable_list = []
+        for key, value in self.car_meshes.items():
+            if value:
+                avaliable_list.append(key)
+        
+        rand_int = random.randint(0, len(avaliable_list)-1)
+        rand_obj = avaliable_list[rand_int]
+        self.car_meshes[rand_obj] = False
+        bpy.context.object.hide_viewport = True
+        print(f'RANDOM TO H*IDE***** {rand_obj}')
+        return rand_obj
+
+    @staticmethod
+    def hide_random_third_of_car(self, context):
+        if len(self.object_to_hide) > 0:
+            self.unhide_random_third_of_car(self, context)
+        one_third = len(self.car_meshes) // 3
+        for i in range(one_third):
+            temp = self.get_random_car_part()
+            self.object_to_hide.append(temp)
+            print(temp)
+            bpy.data.objects[temp].hide_viewport = True
+        
+    @staticmethod
+    def unhide_random_third_of_car(self, context):
+        for key, value in self.car_meshes.items():
+            if not value:
+                bpy.data.objects[key].hide_viewport = False
+                self.car_meshes[key] = True
+        self.object_to_hide.clear()
+        
         
 
 
@@ -219,7 +262,15 @@ class Test_Panel(bpy.types.Panel):
         row = layout.row()
         row.operator('test.test_op', text='Diff Mat').action = 'DIFF_MATERIAL'
         row = layout.row()
-        row.operator('test.test_op', text='Import alembics').action = 'ABC_IMPORT'
+        row.operator('test.test_op', text='Import sync alembics').action = 'ABC_IMPORT'
+        row = layout.row()
+        row.operator('test.test_op', text='Import async alembics').action = 'ABC_ASIMPORT'
+        row = layout.row()
+        row.operator('test.test_op', text='Get all').action = 'GET_ALL'
+        row = layout.row()
+        row.operator('test.test_op', text='Hide random').action = 'HIDE_RANDOM'
+        row = layout.row()
+        row.operator('test.test_op', text='Unhide random').action = 'UNHIDE_RANDOM'
 
 
 def register():
