@@ -1,6 +1,6 @@
 import bpy
 
-class Test_Panel(bpy.types.Panel):
+class Side_Panel(bpy.types.Panel):
     bl_label = "Katana Panel"
     bl_idname = "PT_TestPanel"
     bl_space_type = 'VIEW_3D'
