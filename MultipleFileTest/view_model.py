@@ -24,7 +24,8 @@ class ViewModelOperator(Operator, AddObjectHelper):
             ("HIDE_RANDOM", 'hide random', 'hide random'),
             ("UNHIDE_RANDOM", 'unhide random', 'unhide random'),
             ("SAVE_SCENE", 'save scene', 'save scene'),
-            ("USE_DLL", 'use dll', 'use dll')
+            ("USE_DLL", 'use dll', 'use dll'),
+            ("SELECT_VARIANT", 'select variant', 'select variant')
     ]
 )
 
@@ -54,6 +55,8 @@ class ViewModelOperator(Operator, AddObjectHelper):
             self.save_scene(context)
         elif self.action == 'USE_DLL':
             self.use_dll(self,context)
+        elif self.action == 'SELECT_VARIANT':
+            self.select_variant(self,context)
         return {'FINISHED'}
  
     @staticmethod
@@ -64,7 +67,6 @@ class ViewModelOperator(Operator, AddObjectHelper):
     def add_cube(context):
         utility.add_cube(context)
  
-    
     @staticmethod
     def randomMove(context, cube):
         utility.randomMove(context, cube)
@@ -80,7 +82,6 @@ class ViewModelOperator(Operator, AddObjectHelper):
     @staticmethod
     async def abc_import_assync(context):
         utility.abc_import_assync(context)
-    
 
     def get_all(self,context):
         utility.get_all(self, context)
@@ -97,11 +98,16 @@ class ViewModelOperator(Operator, AddObjectHelper):
     def unhide_random_third_of_car(self, context):
         utility.unhide_random_third_of_car(self, context)
         
-
     @staticmethod
     def save_scene(context, filepath = 'D:\BlenderAddons\Scenes\Test'):
         utility.save_scene(context, filepath)
 
     @staticmethod
     def use_dll(context, filepath = 'D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\OutputCalculator.dll'):
-        utility.use_dll(context, filepath)
+        return utility.use_dll(context, filepath)
+        
+
+    @staticmethod
+    def select_variant(self, context):
+        variant = self.use_dll(context)
+        utility.select_variant(self, variant)

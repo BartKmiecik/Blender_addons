@@ -78,7 +78,7 @@ def abc_import_synconus(self, context):
     for n in abc_list:
         bpy.ops.wm.alembic_import(filepath=n, relative_path=True, as_background_job=False)
         try:
-            tem_name = os.path.basename(n)
+            tem_name = os.path.basename(n).split('.')[0]
             obj = bpy.context.object
             obj.name = tem_name
             self.car_meshes[tem_name] = True
@@ -107,11 +107,12 @@ def get_all(self,context):
     t_start = time.time()
     self.car_meshes.clear()
     for ob in bpy.data.objects:
+        _name = ob.name.split('.')[0]
         # print (ob.name)
         # print(f'Obj: {ob.name} is vis: {not bpy.data.objects[ob.name].hide_viewport}')
-        self.car_meshes[ob.name] = not bpy.data.objects[ob.name].hide_viewport
+        self.car_meshes[_name] = not bpy.data.objects[_name].hide_viewport
     t_end = time.time()
-    print(f'Select all objects in scene: {t_end - t_start}')
+    print(f'Select all objects in scene: {t_end - t_start}, objects: {len(self.car_meshes)}')
 
 
 def get_random_car_part(self):
@@ -184,7 +185,26 @@ def use_dll(self, context, filepath = 'D:\BlenderAddons\Blender_addons\MultipleF
             mydll.CalculateOutput.restype = c_char_p
             result = mydll.CalculateOutput(c_char_p(h_config), c_char_p(h_selection))
             t_result = result.decode("utf-8")
-            print(f'Parts selected by dll: {t_result}')
+            # print(f'Parts selected by dll: {t_result}')
             with open('D:\BlenderAddons\Blender_addons\Images\Test.txt', 'w+') as dt:
                 dt.write(str(t_result))
+    return t_result
 
+
+def hide_all(self):
+    for key, value in self.car_meshes.items():
+        if value:
+            bpy.data.objects[key].hide_viewport = True
+            self.object_to_hide.append(key)
+
+
+def select_variant(self, variant):
+    t_start = time.time()
+    t1 = json.loads(str(variant))
+    for n in t1:
+        part = n["Variant"]
+        state = n["State"]
+        state = True if state == "on" else False
+        bpy.data.objects[part].hide_viewport = not state
+        t_end = time.time()
+    print(f'Select variant, took: {t_end - t_start} sec')

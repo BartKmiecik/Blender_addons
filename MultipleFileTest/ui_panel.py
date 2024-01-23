@@ -21,6 +21,7 @@ class Side_Panel(bpy.types.Panel):
         layout.row().operator('test.test_op', text='Unhide all').action = 'UNHIDE_RANDOM'
         layout.row().operator('test.test_op', text='Save scene').action = 'SAVE_SCENE'
         layout.row().operator('test.test_op', text='Use Dll').action = 'USE_DLL'
+        layout.row().operator('test.test_op', text='Select Variant').action = 'SELECT_VARIANT'
 
 class Test_Panel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_select"
