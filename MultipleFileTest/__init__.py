@@ -1,29 +1,16 @@
-import glob, sys, time, math, random, asyncio, bpy, os
+import asyncio, bpy
 from bpy.props import EnumProperty
 from bpy.types import Operator
-from bpy.props import FloatVectorProperty
 from bpy.utils import register_class, unregister_class
 from bpy_extras.object_utils import AddObjectHelper, object_data_add
 from . import utility
-# import test_package
-# import logging
-# pkg_dir = "D:\\BlenderAddons\\Maker\\testpackage\\utilit_material" 
-# sys.path.append(pkg_dir)
-# print(f'AAAAAAAAAAAA path: {sys.path}')
 
 bl_info = {
-	'name': 'BARTOS',
-	'description': 'Various tools for handle geodata',
-	'author': 'BARTOS',
-	'license': 'GPL',
-	'deps': '',
-	'version': (2, 2, 8),
+	'name': 'Katana',
+	'description': 'Various katana tools',
+	'author': 'BK',
+	'version': (0, 0, 1),
 	'blender': (2, 83, 0),
-	'location': 'View3D > Tools > BARTOS',
-	'warning': '',
-	'wiki_url': 'https://github.com/BARTOS/BlenderGIS/wiki',
-	'tracker_url': 'https://github.com/BARTOS/BlenderGIS/issues',
-	'link': '',
 	'support': 'COMMUNITY',
 	'category': '3D View'
 }
@@ -33,7 +20,6 @@ class TEST_OT_test_op(Operator, AddObjectHelper):
     bl_label = 'Test'
     bl_description = 'Test'
     bl_options = {'REGISTER', 'UNDO'}
-
 
     object_to_hide = []
     car_meshes = {}
@@ -127,58 +113,37 @@ class TEST_OT_test_op(Operator, AddObjectHelper):
 
 
 class Test_Panel(bpy.types.Panel):
-    bl_label = "Test Panel"
+    bl_label = "Katana Panel"
     bl_idname = "PT_TestPanel"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'NewTestTab'
+    bl_category = 'Katana'
     
     def draw(self, context):
         layout = self.layout
-        scene = context.scene
-        row = layout.row()
-        row.label(text="Spawn Cube", icon='CUBE')
-        row = layout.row()
-        row.operator('test.test_op', text='Add Cube').action = 'ADD_CUBE'
-        row = layout.row()
-        row.operator('test.test_op', text='Remove Cube').action = 'REMOVE_CUBE'
-        row = layout.row()
-        row.operator('test.test_op', text='Move').action = 'RANDOM_MOVE'
-        row = layout.row()
-        row.operator('test.test_op', text='Random material').action = 'DIFF_MATERIAL'
-        row = layout.row()
-        row.operator('test.test_op', text='Import sync alembics').action = 'ABC_IMPORT'
-        row = layout.row()
-        row.operator('test.test_op', text='Import async alembics (NOT WORKING YET)').action = 'ABC_ASIMPORT'
-        row = layout.row()
-        row.operator('test.test_op', text='Get all').action = 'GET_ALL'
-        row = layout.row()
-        row.operator('test.test_op', text='Hide random').action = 'HIDE_RANDOM'
-        row = layout.row()
-        row.operator('test.test_op', text='Unhide all').action = 'UNHIDE_RANDOM'
-        row = layout.row()
-        row.operator('test.test_op', text='Save scene').action = 'SAVE_SCENE'
+        layout.row().label(text="Spawn Cube", icon='CUBE')
+        layout.row().operator('test.test_op', text='Add Cube').action = 'ADD_CUBE'
+        layout.row().operator('test.test_op', text='Remove Cube').action = 'REMOVE_CUBE'
+        layout.row().operator('test.test_op', text='Move').action = 'RANDOM_MOVE'        
+        layout.row().operator('test.test_op', text='Random material').action = 'DIFF_MATERIAL'        
+        layout.row().operator('test.test_op', text='Import sync alembics').action = 'ABC_IMPORT'
+        layout.row().operator('test.test_op', text='Import async alembics (NOT WORKING YET)').action = 'ABC_ASIMPORT'
+        layout.row().operator('test.test_op', text='Get all').action = 'GET_ALL'
+        layout.row().operator('test.test_op', text='Hide random').action = 'HIDE_RANDOM'
+        layout.row().operator('test.test_op', text='Unhide all').action = 'UNHIDE_RANDOM'
+        layout.row().operator('test.test_op', text='Save scene').action = 'SAVE_SCENE'
 
-# def add_object_manual_map():
-#    url_manual_prefix = "https://docs.blender.org/manual/en/latest/BARTOS"
-#    url_manual_mapping = (
-#        ("bpy.ops.mesh.add_object", "scene_layout/object/BARTOS/types.html"),
-#    )
-#    return url_manual_prefix, url_manual_mapping
+
+CLASSES_TO_REGISTER = ['TEST_OT_test_op', 'Test_Panel']
 
 def register():
-    register_class(TEST_OT_test_op)
-    register_class(Test_Panel)
-    # bpy.utils.register_manual_map(add_object_manual_map)
+    for n in CLASSES_TO_REGISTER:
+        register_class(eval(n))
 
 
 def unregister():
-    unregister_class(TEST_OT_test_op)
-    register_class(Test_Panel)
-    # bpy.utils.register_manual_map(add_object_manual_map)
-
-
-# register()
+    for n in CLASSES_TO_REGISTER:
+        unregister_class(eval(n))
 
 
 if __name__ == "__main__":

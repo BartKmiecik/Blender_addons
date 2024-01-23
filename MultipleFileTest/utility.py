@@ -77,7 +77,7 @@ def abc_import_synconus(self, context):
             tem_name = os.path.basename(n)
             obj = bpy.context.object
             obj.name = tem_name
-            self.car_meshes[obj] = True
+            self.car_meshes[tem_name] = True
         except:
             print('Missing mesh')
     t_end = time.time()
