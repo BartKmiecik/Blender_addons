@@ -12,7 +12,7 @@ bl_info = {
 }
 
 
-CLASSES_TO_REGISTER = ['view_model.ViewModelOperator', 'ui_panel.Side_Panel']
+CLASSES_TO_REGISTER = ['view_model.ViewModelOperator', 'ui_panel.Side_Panel', 'ui_panel.Test_Panel']
 
 def register():
     for n in CLASSES_TO_REGISTER:

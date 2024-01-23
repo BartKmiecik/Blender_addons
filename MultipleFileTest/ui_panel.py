@@ -20,3 +20,30 @@ class Side_Panel(bpy.types.Panel):
         layout.row().operator('test.test_op', text='Hide random').action = 'HIDE_RANDOM'
         layout.row().operator('test.test_op', text='Unhide all').action = 'UNHIDE_RANDOM'
         layout.row().operator('test.test_op', text='Save scene').action = 'SAVE_SCENE'
+        layout.row().operator('test.test_op', text='Use Dll').action = 'USE_DLL'
+
+class Test_Panel(bpy.types.Panel):
+    bl_idname = "OBJECT_PT_select"
+    bl_label = "Select"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "object"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @classmethod
+    def poll(cls, context):
+        return (context.object is not None)
+
+    def draw_header(self, context):
+        layout = self.layout
+        layout.label(text="My Select Panel")
+
+    def draw(self, context):
+        layout = self.layout
+
+        box = layout.box()
+        box.label(text="Selection Tools")
+        box.operator("object.select_all").action = 'TOGGLE'
+        row = box.row()
+        row.operator("object.select_all").action = 'INVERT'
+        row.operator("object.select_random")

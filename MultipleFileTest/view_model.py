@@ -24,6 +24,7 @@ class ViewModelOperator(Operator, AddObjectHelper):
             ("HIDE_RANDOM", 'hide random', 'hide random'),
             ("UNHIDE_RANDOM", 'unhide random', 'unhide random'),
             ("SAVE_SCENE", 'save scene', 'save scene'),
+            ("USE_DLL", 'use dll', 'use dll')
     ]
 )
 
@@ -51,6 +52,8 @@ class ViewModelOperator(Operator, AddObjectHelper):
             self.unhide_random_third_of_car(self, context)
         elif self.action == 'SAVE_SCENE':
             self.save_scene(context)
+        elif self.action == 'USE_DLL':
+            self.use_dll(self,context)
         return {'FINISHED'}
  
     @staticmethod
@@ -98,3 +101,7 @@ class ViewModelOperator(Operator, AddObjectHelper):
     @staticmethod
     def save_scene(context, filepath = 'D:\BlenderAddons\Scenes\Test'):
         utility.save_scene(context, filepath)
+
+    @staticmethod
+    def use_dll(context, filepath = 'D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\OutputCalculator.dll'):
+        utility.use_dll(context, filepath)
