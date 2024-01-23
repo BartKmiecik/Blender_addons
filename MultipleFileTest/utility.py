@@ -17,7 +17,7 @@ def remove_object(context, obj_to_remove):
 def add_cube(context):
     # bpy.ops.mesh.primitive_cube_add()
     cube = bpy.ops.mesh.primitive_cube_add(size=4, location=(0, 0, 0))
-    new_mat = bpy.config.materials.new(name="Material")
+    new_mat = bpy.data.materials.new(name="Material")
     new_mat.use_nodes = True
     bsdf = new_mat.node_tree.nodes["Principled BSDF"]
     color_ramp = new_mat.node_tree.nodes.new("ShaderNodeValToRGB")
@@ -26,7 +26,7 @@ def add_cube(context):
 
     cube = bpy.context.selected_objects
     for obj in cube:
-        obj.config.materials.append(new_mat)
+        obj.data.materials.append(new_mat)
 
 
 def randomMove(context, cube):
@@ -45,9 +45,9 @@ def diffMate(context, cube):
         print(cube)
     if cube is not None:
         try:
-            material_basic = bpy.config.materials['Basic Mat']        
+            material_basic = bpy.data.materials['Basic Mat']        
         except:
-            material_basic = bpy.config.materials.new(name='Basic Mat')
+            material_basic = bpy.data.materials.new(name='Basic Mat')
         material_basic.use_nodes = True
         principled_node = material_basic.node_tree.nodes.get('Principled BSDF')
         r = random.random()
@@ -67,7 +67,7 @@ def diffMate(context, cube):
         textur_node.location = (-380, 300)
         images_list = list(glob.glob("D:\BlenderAddons\Maker\Images\*"))
         random_image = images_list[random.randint(0, len(images_list)-1)]
-        textur_node.image = bpy.config.images.load(random_image)
+        textur_node.image = bpy.data.images.load(random_image)
         material_basic.node_tree.links.new(textur_node.outputs[0], principled_node.inputs[0])
         cube.active_material = material_basic
 
@@ -106,10 +106,10 @@ async def abc_import_assync(context):
 def get_all(self,context):
     t_start = time.time()
     self.car_meshes.clear()
-    for ob in bpy.config.objects:
+    for ob in bpy.data.objects:
         # print (ob.name)
-        # print(f'Obj: {ob.name} is vis: {not bpy.config.objects[ob.name].hide_viewport}')
-        self.car_meshes[ob.name] = not bpy.config.objects[ob.name].hide_viewport
+        # print(f'Obj: {ob.name} is vis: {not bpy.data.objects[ob.name].hide_viewport}')
+        self.car_meshes[ob.name] = not bpy.data.objects[ob.name].hide_viewport
     t_end = time.time()
     print(f'Select all objects in scene: {t_end - t_start}')
 
@@ -134,7 +134,7 @@ def hide_random_third_of_car(self, context):
     for i in range(one_third):
         temp = self.get_random_car_part()
         self.object_to_hide.append(temp)
-        bpy.config.objects[temp].hide_viewport = True
+        bpy.data.objects[temp].hide_viewport = True
     t_end = time.time()
     print(f'Hide random one/third: {t_end - t_start}')
     
@@ -145,7 +145,7 @@ def unhide_random_third_of_car(self, context):
     t_start = time.time()
     for key, value in self.car_meshes.items():
         if not value:
-            bpy.config.objects[key].hide_viewport = False
+            bpy.data.objects[key].hide_viewport = False
             self.car_meshes[key] = True
     self.object_to_hide.clear()
     t_end = time.time()
