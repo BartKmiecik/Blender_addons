@@ -184,6 +184,7 @@ def use_dll(self, context, filepath = 'D:\BlenderAddons\Blender_addons\MultipleF
             mydll.CalculateOutput.restype = c_char_p
             result = mydll.CalculateOutput(c_char_p(h_config), c_char_p(h_selection))
             t_result = result.decode("utf-8")
+            print(f'Parts selected by dll: {t_result}')
             with open('D:\BlenderAddons\Blender_addons\Images\Test.txt', 'w+') as dt:
                 dt.write(str(t_result))
 
