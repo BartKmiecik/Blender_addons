@@ -32,6 +32,6 @@ class DropdownInteriorTrim(Operator):
         self.__class__.selected_interior_trim = self.interior_trims
         self.report({'INFO'}, str(self.__class__.selected_interior_trim))
         print(f'Interior SELECTED: {self.selected_interior_trim}')
-        variant = utility.use_dll(interior = self.selected_interior_trim)
-        utility.select_variant(variant=variant)
+        # variant = utility.use_dll(interior = self.selected_interior_trim)
+        utility.change_interior_trim(interior_trim=self.selected_interior_trim)
         return {'FINISHED'}

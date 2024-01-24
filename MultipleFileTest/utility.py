@@ -4,7 +4,9 @@ import json, ctypes
 
 object_to_hide = []
 car_meshes = {}
-
+curent_car_paint = 'GAT'
+curent_interior_trim = 'A'
+curent_eim = 'GLVALG2Z34ZUA-----'
 
 def remove_object(context, obj_to_remove):
     if obj_to_remove == None:
@@ -168,7 +170,11 @@ def save_scene(context, filepath = 'D:\BlenderAddons\Scenes\Test'):
     print(f'Scene saved to: {filepath}, took: {t_end - t_start} sec')
 
 
-def use_dll(interior = "A", carpaint = "GAT", eim = "GLVALG2Z34ZUA-----"):
+def use_dll(interior = curent_interior_trim, carpaint = curent_car_paint, eim = curent_eim):
+    global curent_interior_trim, curent_car_paint, curent_eim
+    curent_interior_trim = interior
+    curent_car_paint = carpaint
+    curent_eim = eim
     with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson2.json', 'r') as config:
         t_config = config.read()
         g_config = json.loads(t_config)
@@ -201,11 +207,15 @@ def select_variant(variant):
         state = n["State"]
         if state == 'on':
             state = True
-            bpy.data.objects[part].hide_viewport = not state
         elif state == 'off':
             state = False
-            bpy.data.objects[part].hide_viewport = not state
+        try:
+            if type(state) == bool:
+                bpy.data.objects[part].hide_viewport = not state
+        except:
+            print(f"Mesh: {part}, doesn't exist in scene")
         t_end = time.time()
+        
     print(f'Select variant, took: {t_end - t_start} sec')
 
 
@@ -273,8 +283,6 @@ def change_car_paint(car_paint = 'GAT'):
         principled_node.inputs[1].default_value = m
         principled_node.inputs[2].default_value = roug
         principled_node.inputs[3].default_value = ior
-    
-    
 
     with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
         t_config = config.read()
@@ -288,9 +296,47 @@ def change_car_paint(car_paint = 'GAT'):
                 tempPath = str(key).split('/')[0]
                 temp = str(value["variantSet"])
                 if tempPath == 'EXTERIOR':
-                    mesh = bpy.data.objects[temp]
-                    mesh.active_material = mat_exterior
+                    try:
+                        mesh = bpy.data.objects[temp]
+                        mesh.active_material = mat_exterior
+                    except:
+                        print(f"Mesh: {temp} doesn't exsist on scene")
 
+def change_interior_trim(interior_trim = 'A'):
+    result = use_dll(interior=interior_trim)
+    result = json.loads(result)
+    # {"Path":"Materials/S_DOOR_INSERTS_INNER_","State":"JG77_","Variant":"S_DOOR_INSERTS_INNER_"}
+    for i in result:
+        temp_path = str(i["Path"]).split('/')
+        if temp_path[0] == "Materials" and temp_path[1] != 'Colors':
+            # print(f'First: {temp_path[0]} and second: {temp_path[1]}\n')
+            mat_name = i["State"]
+            mesh_name = i["Variant"]
+    
+            try:
+                mat_interior = bpy.data.materials[mat_name]        
+            except:
+                mat_interior = bpy.data.materials.new(name=mat_name)
+                mat_interior.use_nodes = True
+                r = random.random()
+                g = random.random()
+                b = random.random()
+                m = random.random()
+                roug = random.random()
+                ior = random.random() * random.randint(1, 3)
+                # print(f'Ref:{r}, Blue:{b}, green: {g}')
+                principled_node = mat_interior.node_tree.nodes.get('Principled BSDF')
+                principled_node.inputs[0].default_value = (r, g, b, 1)
+                principled_node.inputs[1].default_value = m
+                principled_node.inputs[2].default_value = roug
+                principled_node.inputs[3].default_value = ior
+                try:
+                    mesh = bpy.data.objects[mesh_name]
+                    mesh.active_material = mat_interior
+                    # print(f'Material changed on: {mesh_name}')
+                except:
+                    print(f"Mesh: {mesh_name} doesn't exist in scene")
+                        
             
             
 def read_all_emis():

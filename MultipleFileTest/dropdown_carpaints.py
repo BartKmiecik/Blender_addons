@@ -32,6 +32,5 @@ class DropdowCarpaints(Operator):
         self.__class__.selected_carpaint = self.carpaints
         self.report({'INFO'}, str(self.__class__.selected_carpaint))
         print(f'Carpaint SELECTED: {self.selected_carpaint}')
-        variant = utility.use_dll(carpaint = self.selected_carpaint)
-        utility.change_car_paint(car_paint=variant)
+        utility.change_car_paint(car_paint=self.selected_carpaint)
         return {'FINISHED'}
