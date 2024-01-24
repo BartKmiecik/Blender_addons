@@ -41,7 +41,7 @@ def randomMove(context, cube):
 def diffMate(context, cube):
     if cube is None or cube is []:
         cube = bpy.context.object
-        print(cube)
+        # print(cube)
     if cube is not None:
         try:
             material_basic = bpy.data.materials['Basic Mat']        
@@ -209,18 +209,53 @@ def select_variant(variant):
     print(f'Select variant, took: {t_end - t_start} sec')
 
 
-def assigne_mat(self):
+def fake_material():
+    try:
+        mat_chassis = bpy.data.materials['Mat CHASSIS']        
+    except:
+        mat_chassis = bpy.data.materials.new(name='Mat CHASSIS')
+    mat_chassis.use_nodes = True
+    principled_node = mat_chassis.node_tree.nodes.get('Principled BSDF')
+    principled_node.inputs[0].default_value = (.1, .1, .1, 1)
+    
+    try:
+        mat_exterior = bpy.data.materials['Mat EXTERIOR']        
+    except:
+        mat_exterior = bpy.data.materials.new(name='Mat EXTERIOR')
+    mat_exterior.use_nodes = True
+    principled_node = mat_exterior.node_tree.nodes.get('Principled BSDF')
+    principled_node.inputs[0].default_value = (.9, .1, .4, 1)
+    
+    try:
+        mat_interior = bpy.data.materials['Mat INTERIOR']        
+    except:
+        mat_interior = bpy.data.materials.new(name='Mat INTERIOR')
+    mat_interior.use_nodes = True
+    principled_node = mat_interior.node_tree.nodes.get('Principled BSDF')
+    principled_node.inputs[0].default_value = (.2, .8, .3, 1)
+    
     with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
         t_config = config.read()
         g_config = json.loads(t_config)
         metaVariant = g_config['metaVariantSets']
-        interior = metaVariant["Interior"]
-        int_variants = interior["variants"]
-        a_variants = int_variants["A"]
-        var_set = a_variants["usdVariants"]
-        # print(f'A variant: {a_variants["usdVariants"]}')
-        for key, value in var_set.items():
-            print(f'Matvariants config KEY       : {value["variant"]} \n')
+        preset = metaVariant["Preset"]
+        int_variants = preset["variants"]
+        for key, value in int_variants.items():
+            usdVariants = value["usdVariants"]
+            for key, value in usdVariants.items():
+                tempPath = str(key).split('/')[0]
+                temp = str(value["variantSet"])
+                if tempPath == 'CHASSIS':
+                    mesh = bpy.data.objects[temp]
+                    mesh.active_material = mat_chassis
+                if tempPath == 'EXTERIOR':
+                    mesh = bpy.data.objects[temp]
+                    mesh.active_material = mat_exterior
+                if tempPath == 'INTERIOR':
+                    mesh = bpy.data.objects[temp]
+                    mesh.active_material = mat_interior
+
+            
             
             
 def read_all_emis():
@@ -232,7 +267,7 @@ def read_all_emis():
         preset = metaVariant["Preset"]
         int_variants = preset["variants"]
         for key, value in int_variants.items():
-            print(f'Matvariants config KEY       : {key} \n')
+            # print(f'Matvariants config KEY       : {key} \n')
             eim_list.append(key)
     return eim_list
 
@@ -246,7 +281,7 @@ def read_all_carpaints():
         preset = metaVariant["Paint"]
         int_variants = preset["variants"]
         for key, value in int_variants.items():
-            print(f'Matvariants config KEY       : {key} \n')
+            # print(f'Matvariants config KEY       : {key} \n')
             eim_list.append(key)
     return eim_list
 
@@ -259,6 +294,6 @@ def read_all_interior_trim():
         preset = metaVariant["Interior"]
         int_variants = preset["variants"]
         for key, value in int_variants.items():
-            print(f'Matvariants config KEY       : {key} \n')
+            # print(f'Matvariants config KEY       : {key} \n')
             eim_list.append(key)
     return eim_list

@@ -26,7 +26,7 @@ class ViewModelOperator(Operator, AddObjectHelper):
             ("SAVE_SCENE", 'save scene', 'save scene'),
             ("USE_DLL", 'use dll', 'use dll'),
             ("SELECT_VARIANT", 'select variant', 'select variant'),
-            ("ASSIGNE_MAT", 'assigne mate', 'assigne mate'),
+            ("FAKE_MATERIALS", 'fake mate', 'fake mate'),
         ]
     )
 
@@ -59,8 +59,8 @@ class ViewModelOperator(Operator, AddObjectHelper):
             self.use_dll(self,context)
         elif self.action == 'SELECT_VARIANT':
             self.select_variant(self,context)
-        elif self.action == 'ASSIGNE_MAT':
-            self.assigne_mat(self)
+        elif self.action == 'FAKE_MATERIALS':
+            self.fake_material(self)
         return {'FINISHED'}
  
  
@@ -113,8 +113,8 @@ class ViewModelOperator(Operator, AddObjectHelper):
         return utility.use_dll()
 
     @staticmethod
-    def assigne_mat(self):
-        utility.assigne_mat(self)
+    def fake_material(self):
+        utility.fake_material()
         
     @staticmethod
     def select_variant(self, context):

@@ -17,7 +17,7 @@ CLASSES_TO_REGISTER = ['view_model.ViewModelOperator', 'dropdown_eim.DropdownEIM
 
 def register():
     for n in CLASSES_TO_REGISTER:
-        print(f'{n}\n\n')
+        # print(f'{n}\n\n')
         register_class(eval(n))
 
 
