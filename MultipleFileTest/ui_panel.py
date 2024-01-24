@@ -1,4 +1,5 @@
 import bpy
+from . import dropdown_eim, dropdown_carpaints
 
 class Side_Panel(bpy.types.Panel):
     bl_label = "Katana Panel"
@@ -23,7 +24,10 @@ class Side_Panel(bpy.types.Panel):
         layout.row().operator('test.test_op', text='Select Variant').action = 'SELECT_VARIANT'
         layout.row().operator('test.test_op', text='Assignee Materials').action = 'ASSIGNE_MAT'
         layout.row().operator('test.test_op', text='Save scene').action = 'SAVE_SCENE'
-        layout.row().operator('test.dropdown')
+        layout.row().label(text=f'EIM: {str(dropdown_eim.DropdownEIM.selected_eim)}')
+        layout.row().operator('test.dropdown_eim', text='Select EIM')
+        layout.row().label(text=f'Carpaint: {str(dropdown_carpaints.DropdowCarpaints.selected_carpaint)}')
+        layout.row().operator('test.dropdown_carpaint', text='Select Carpaint')
 
 
 class Test_Panel(bpy.types.Panel):

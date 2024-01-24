@@ -233,3 +233,17 @@ def read_all_emis():
             print(f'Matvariants config KEY       : {key} \n')
             eim_list.append(key)
     return eim_list
+
+            
+def read_all_carpaints():
+    eim_list = []
+    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
+        t_config = config.read()
+        g_config = json.loads(t_config)
+        metaVariant = g_config['metaVariantSets']
+        preset = metaVariant["Paint"]
+        int_variants = preset["variants"]
+        for key, value in int_variants.items():
+            print(f'Matvariants config KEY       : {key} \n')
+            eim_list.append(key)
+    return eim_list

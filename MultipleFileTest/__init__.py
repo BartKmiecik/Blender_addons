@@ -1,5 +1,5 @@
 from bpy.utils import register_class, unregister_class
-from . import ui_panel, view_model, dropdown
+from . import dropdown_eim, dropdown_carpaints, ui_panel, view_model
 
 bl_info = {
 	'name': 'Katana',
@@ -12,10 +12,12 @@ bl_info = {
 }
 
 
-CLASSES_TO_REGISTER = ['view_model.ViewModelOperator', 'dropdown.DropdownOperator','ui_panel.Side_Panel', 'ui_panel.Test_Panel']
+CLASSES_TO_REGISTER = ['view_model.ViewModelOperator', 'dropdown_eim.DropdownEIM', 'dropdown_carpaints.DropdowCarpaints',
+                       'ui_panel.Side_Panel', 'ui_panel.Test_Panel']
 
 def register():
     for n in CLASSES_TO_REGISTER:
+        print(f'{n}\n\n')
         register_class(eval(n))
 
 
