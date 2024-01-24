@@ -255,7 +255,42 @@ def fake_material():
                     mesh = bpy.data.objects[temp]
                     mesh.active_material = mat_interior
 
-            
+def change_car_paint(car_paint = 'GAT'):
+    try:
+        mat_exterior = bpy.data.materials[car_paint]        
+    except:
+        mat_exterior = bpy.data.materials.new(name=car_paint)
+        mat_exterior.use_nodes = True
+        r = random.random()
+        g = random.random()
+        b = random.random()
+        m = random.random()
+        roug = random.random()
+        ior = random.random() * random.randint(1, 3)
+        # print(f'Ref:{r}, Blue:{b}, green: {g}')
+        principled_node = mat_exterior.node_tree.nodes.get('Principled BSDF')
+        principled_node.inputs[0].default_value = (r, g, b, 1)
+        principled_node.inputs[1].default_value = m
+        principled_node.inputs[2].default_value = roug
+        principled_node.inputs[3].default_value = ior
+    
+    
+
+    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
+        t_config = config.read()
+        g_config = json.loads(t_config)
+        metaVariant = g_config['metaVariantSets']
+        preset = metaVariant["Preset"]
+        int_variants = preset["variants"]
+        for key, value in int_variants.items():
+            usdVariants = value["usdVariants"]
+            for key, value in usdVariants.items():
+                tempPath = str(key).split('/')[0]
+                temp = str(value["variantSet"])
+                if tempPath == 'EXTERIOR':
+                    mesh = bpy.data.objects[temp]
+                    mesh.active_material = mat_exterior
+
             
             
 def read_all_emis():
