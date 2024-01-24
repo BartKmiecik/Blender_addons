@@ -25,9 +25,11 @@ class ViewModelOperator(Operator, AddObjectHelper):
             ("UNHIDE_RANDOM", 'unhide random', 'unhide random'),
             ("SAVE_SCENE", 'save scene', 'save scene'),
             ("USE_DLL", 'use dll', 'use dll'),
-            ("SELECT_VARIANT", 'select variant', 'select variant')
-    ]
-)
+            ("SELECT_VARIANT", 'select variant', 'select variant'),
+            ("ASSIGNE_MAT", 'assigne mate', 'assigne mate'),
+        ]
+    )
+
 
     def execute(self, context):
         if self.action == 'ADD_CUBE':
@@ -46,7 +48,7 @@ class ViewModelOperator(Operator, AddObjectHelper):
         elif self.action == 'ABC_ASIMPORT':
             asyncio.run(self.abc_import_assync(context))
         elif self.action == 'GET_ALL':
-            self.get_all(self)
+            self.get_all()
         elif self.action == 'HIDE_RANDOM':
             self.hide_random_third_of_car(self, context)
         elif self.action == 'UNHIDE_RANDOM':
@@ -57,7 +59,10 @@ class ViewModelOperator(Operator, AddObjectHelper):
             self.use_dll(self,context)
         elif self.action == 'SELECT_VARIANT':
             self.select_variant(self,context)
+        elif self.action == 'ASSIGNE_MAT':
+            self.assigne_mat(self)
         return {'FINISHED'}
+ 
  
     @staticmethod
     def remove_object(context, obj_to_remove):
@@ -82,9 +87,10 @@ class ViewModelOperator(Operator, AddObjectHelper):
     @staticmethod
     async def abc_import_assync(context):
         utility.abc_import_assync(context)
-
-    def get_all(self,context):
-        utility.get_all(self, context)
+    
+    @staticmethod
+    def get_all():
+        utility.get_all()
 
     def get_random_car_part(self):
         rand_obj = utility.get_random_car_part(self)
@@ -103,11 +109,19 @@ class ViewModelOperator(Operator, AddObjectHelper):
         utility.save_scene(context, filepath)
 
     @staticmethod
-    def use_dll(context, filepath = 'D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\OutputCalculator.dll'):
-        return utility.use_dll(context, filepath)
-        
+    def use_dll(context, eim = "GLVALG2Z34ZUA-----"):
+        return utility.use_dll()
 
+    @staticmethod
+    def assigne_mat(self):
+        utility.assigne_mat(self)
+        
     @staticmethod
     def select_variant(self, context):
         variant = self.use_dll(context)
-        utility.select_variant(self, variant)
+        utility.select_variant(variant)
+        
+
+
+        
+        

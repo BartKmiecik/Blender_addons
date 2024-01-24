@@ -1,7 +1,6 @@
 import glob, sys, time, math, random, asyncio, bpy, os
 from ctypes import *
 import json, ctypes
-from . import config
 
 object_to_hide = []
 car_meshes = {}
@@ -103,16 +102,17 @@ async def abc_import_assync(context):
             print('Missing mesh')
 
 
-def get_all(self,context):
+def get_all():
     t_start = time.time()
-    self.car_meshes.clear()
+    car_meshes.clear()
     for ob in bpy.data.objects:
-        _name = ob.name.split('.')[0]
+        _name = ob.name
+        # print(f'NAAAAAAAAAAAAAAAAAAAME: {_name}')
         # print (ob.name)
         # print(f'Obj: {ob.name} is vis: {not bpy.data.objects[ob.name].hide_viewport}')
-        self.car_meshes[_name] = not bpy.data.objects[_name].hide_viewport
+        car_meshes[_name] = not bpy.data.objects[_name].hide_viewport
     t_end = time.time()
-    print(f'Select all objects in scene: {t_end - t_start}, objects: {len(self.car_meshes)}')
+    print(f'Select all objects in scene: {t_end - t_start}, objects: {len(car_meshes)}')
 
 
 def get_random_car_part(self):
@@ -142,7 +142,7 @@ def hide_random_third_of_car(self, context):
 
 def unhide_random_third_of_car(self, context):
     if len(self.car_meshes.items()) == 0:
-        self.get_all(context)
+        self.get_all()
     t_start = time.time()
     for key, value in self.car_meshes.items():
         if not value:
@@ -168,10 +168,7 @@ def save_scene(context, filepath = 'D:\BlenderAddons\Scenes\Test'):
     print(f'Scene saved to: {filepath}, took: {t_end - t_start} sec')
 
 
-def use_dll(self, context, filepath = 'D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\OutputCalculator.dll'):
-    # test = config.Configurator(self)   # Working solution from config
-    # result = test.CallForHelp()        # Working solution from config
-    # print(result)                      # Working solution from config
+def use_dll(eim = "GLVALG2Z34ZUA-----"):
     with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson2.json', 'r') as config:
         t_config = config.read()
         g_config = json.loads(t_config)
@@ -179,8 +176,9 @@ def use_dll(self, context, filepath = 'D:\BlenderAddons\Blender_addons\MultipleF
         with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\Selections.json', 'r') as selection:
             t_sel = selection.read()
             g_selection = json.loads(t_sel)
+            g_selection["Preset"] = eim
             h_selection = json.dumps(g_selection).encode("utf-8")
-            mydll = cdll.LoadLibrary(filepath)
+            mydll = cdll.LoadLibrary('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\OutputCalculator.dll')
             mydll.CalculateOutput.argtypes = [c_char_p, c_char_p]
             mydll.CalculateOutput.restype = c_char_p
             result = mydll.CalculateOutput(c_char_p(h_config), c_char_p(h_selection))
@@ -191,20 +189,47 @@ def use_dll(self, context, filepath = 'D:\BlenderAddons\Blender_addons\MultipleF
     return t_result
 
 
-def hide_all(self):
-    for key, value in self.car_meshes.items():
-        if value:
-            bpy.data.objects[key].hide_viewport = True
-            self.object_to_hide.append(key)
-
-
-def select_variant(self, variant):
+def select_variant(variant):
+    if len(car_meshes) == 0:
+        get_all()
     t_start = time.time()
     t1 = json.loads(str(variant))
     for n in t1:
         part = n["Variant"]
         state = n["State"]
-        state = True if state == "on" else False
-        bpy.data.objects[part].hide_viewport = not state
+        if state == 'on':
+            state = True
+            bpy.data.objects[part].hide_viewport = not state
+        elif state == 'off':
+            state = False
+            bpy.data.objects[part].hide_viewport = not state
         t_end = time.time()
     print(f'Select variant, took: {t_end - t_start} sec')
+
+
+def assigne_mat(self):
+    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
+        t_config = config.read()
+        g_config = json.loads(t_config)
+        metaVariant = g_config['metaVariantSets']
+        interior = metaVariant["Interior"]
+        int_variants = interior["variants"]
+        a_variants = int_variants["A"]
+        var_set = a_variants["usdVariants"]
+        # print(f'A variant: {a_variants["usdVariants"]}')
+        for key, value in var_set.items():
+            print(f'Matvariants config KEY       : {value["variant"]} \n')
+            
+            
+def read_all_emis():
+    eim_list = []
+    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
+        t_config = config.read()
+        g_config = json.loads(t_config)
+        metaVariant = g_config['metaVariantSets']
+        preset = metaVariant["Preset"]
+        int_variants = preset["variants"]
+        for key, value in int_variants.items():
+            print(f'Matvariants config KEY       : {key} \n')
+            eim_list.append(key)
+    return eim_list
