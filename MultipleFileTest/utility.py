@@ -168,7 +168,7 @@ def save_scene(context, filepath = 'D:\BlenderAddons\Scenes\Test'):
     print(f'Scene saved to: {filepath}, took: {t_end - t_start} sec')
 
 
-def use_dll(eim = "GLVALG2Z34ZUA-----"):
+def use_dll(interior = "A", carpaint = "GAT", eim = "GLVALG2Z34ZUA-----"):
     with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson2.json', 'r') as config:
         t_config = config.read()
         g_config = json.loads(t_config)
@@ -177,6 +177,8 @@ def use_dll(eim = "GLVALG2Z34ZUA-----"):
             t_sel = selection.read()
             g_selection = json.loads(t_sel)
             g_selection["Preset"] = eim
+            g_selection["Paint"] = carpaint
+            g_selection["Interior"] = interior
             h_selection = json.dumps(g_selection).encode("utf-8")
             mydll = cdll.LoadLibrary('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\OutputCalculator.dll')
             mydll.CalculateOutput.argtypes = [c_char_p, c_char_p]
@@ -242,6 +244,19 @@ def read_all_carpaints():
         g_config = json.loads(t_config)
         metaVariant = g_config['metaVariantSets']
         preset = metaVariant["Paint"]
+        int_variants = preset["variants"]
+        for key, value in int_variants.items():
+            print(f'Matvariants config KEY       : {key} \n')
+            eim_list.append(key)
+    return eim_list
+
+def read_all_interior_trim():
+    eim_list = []
+    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
+        t_config = config.read()
+        g_config = json.loads(t_config)
+        metaVariant = g_config['metaVariantSets']
+        preset = metaVariant["Interior"]
         int_variants = preset["variants"]
         for key, value in int_variants.items():
             print(f'Matvariants config KEY       : {key} \n')

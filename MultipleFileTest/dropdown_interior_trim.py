@@ -3,22 +3,22 @@ from bpy.props import EnumProperty
 from . import utility
 
 
-class DropdowCarpaints(Operator):
-    bl_idname = 'test.dropdown_carpaint'
+class DropdownInteriorTrim(Operator):
+    bl_idname = 'test.dropdown_interior_trim'
     bl_label = 'Select Carpaint'
     
-    eim_list = utility.read_all_carpaints()
+    eim_list = utility.read_all_interior_trim()
     temp_enum = []
     for i in range(len(eim_list)):
         temp_enum.append((eim_list[i], eim_list[i], eim_list[i]))  
 
-    carpaints: EnumProperty(
+    interior_trims: EnumProperty(
         name= '',
         description='Select carpaint',
         items = temp_enum
     )
 
-    selected_carpaint = '---'
+    selected_interior_trim = '---'
     
     def invoke(self, context, event):
         wm = context.window_manager
@@ -26,12 +26,12 @@ class DropdowCarpaints(Operator):
     
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, "carpaints")
+        layout.prop(self, "interior_trims")
 
     def execute(self, context):
-        self.__class__.selected_carpaint = self.carpaints
-        self.report({'INFO'}, str(self.__class__.selected_carpaint))
-        print(f'Carpaint SELECTED: {self.selected_carpaint}')
-        variant = utility.use_dll(carpaint = self.selected_carpaint)
+        self.__class__.selected_interior_trim = self.interior_trims
+        self.report({'INFO'}, str(self.__class__.selected_interior_trim))
+        print(f'Interior SELECTED: {self.selected_interior_trim}')
+        variant = utility.use_dll(interior = self.selected_interior_trim)
         utility.select_variant(variant=variant)
         return {'FINISHED'}
