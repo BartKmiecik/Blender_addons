@@ -30,7 +30,7 @@ class Side_Panel(bpy.types.Panel):
         layout.row().operator('test.dropdown_carpaint', text='Select Carpaint')
         layout.row().label(text=f'Interior Trim: {str(dropdown_interior_trim.DropdownInteriorTrim.selected_interior_trim)}')
         layout.row().operator('test.dropdown_interior_trim', text='Select Interior Trim')
-
+        layout.row().operator('test.test_op', text='Create Empty Rig').action = 'CREATE_RIG'
 
 class Test_Panel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_select"

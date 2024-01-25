@@ -27,13 +27,14 @@ class ViewModelOperator(Operator, AddObjectHelper):
             ("USE_DLL", 'use dll', 'use dll'),
             ("SELECT_VARIANT", 'select variant', 'select variant'),
             ("FAKE_MATERIALS", 'fake mate', 'fake mate'),
+            ('CREATE_RIG', 'create rig', 'create rig')
         ]
     )
 
 
     def execute(self, context):
         if self.action == 'ADD_CUBE':
-            self.add_cube(context=context)
+            self.add_cube()
         elif self.action == 'REMOVE_CUBE':
             _obj = bpy.context.selected_objects
             self.remove_object(context=context, obj_to_remove=_obj)
@@ -61,6 +62,8 @@ class ViewModelOperator(Operator, AddObjectHelper):
             self.select_variant(self,context)
         elif self.action == 'FAKE_MATERIALS':
             self.fake_material(self)
+        elif self.action == 'CREATE_RIG':
+            self.create_rig()
         return {'FINISHED'}
  
  
@@ -69,8 +72,8 @@ class ViewModelOperator(Operator, AddObjectHelper):
         utility.remove_object(context, obj_to_remove)
  
     @staticmethod
-    def add_cube(context):
-        utility.add_cube(context)
+    def add_cube():
+        utility.add_cube()
  
     @staticmethod
     def randomMove(context, cube):
@@ -120,6 +123,11 @@ class ViewModelOperator(Operator, AddObjectHelper):
     def select_variant(self, context):
         variant = self.use_dll(context)
         utility.select_variant(variant)
+        
+    @staticmethod
+    def create_rig():
+       utility.create_rig()
+       pass
         
 
 
