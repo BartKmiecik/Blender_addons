@@ -6,6 +6,7 @@ curent_car_paint = 'GAT'
 curent_interior_trim = 'A'
 curent_eim = 'GLVALG2Z34ZUA-----'
 
+
 def get_all():
     t_start = time.time()
     car_meshes.clear()
@@ -15,6 +16,7 @@ def get_all():
     t_end = time.time()
     print(f'Select all objects in scene: {t_end - t_start}, objects: {len(car_meshes)}')
     return car_meshes
+
 
 def use_dll(interior = curent_interior_trim, carpaint = curent_car_paint, eim = curent_eim):
     global curent_interior_trim, curent_car_paint, curent_eim
@@ -65,53 +67,6 @@ def select_variant(variant):
     print(f'Select variant, took: {t_end - t_start} sec')
 
 
-def fake_material():
-    try:
-        mat_chassis = bpy.data.materials['Mat CHASSIS']        
-    except:
-        mat_chassis = bpy.data.materials.new(name='Mat CHASSIS')
-    mat_chassis.use_nodes = True
-    principled_node = mat_chassis.node_tree.nodes.get('Principled BSDF')
-    principled_node.inputs[0].default_value = (.1, .1, .1, 1)
-    
-    try:
-        mat_exterior = bpy.data.materials['Mat EXTERIOR']        
-    except:
-        mat_exterior = bpy.data.materials.new(name='Mat EXTERIOR')
-    mat_exterior.use_nodes = True
-    principled_node = mat_exterior.node_tree.nodes.get('Principled BSDF')
-    principled_node.inputs[0].default_value = (.9, .1, .4, 1)
-    
-    try:
-        mat_interior = bpy.data.materials['Mat INTERIOR']        
-    except:
-        mat_interior = bpy.data.materials.new(name='Mat INTERIOR')
-    mat_interior.use_nodes = True
-    principled_node = mat_interior.node_tree.nodes.get('Principled BSDF')
-    principled_node.inputs[0].default_value = (.2, .8, .3, 1)
-    
-    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
-        t_config = config.read()
-        g_config = json.loads(t_config)
-        metaVariant = g_config['metaVariantSets']
-        preset = metaVariant["Preset"]
-        int_variants = preset["variants"]
-        for key, value in int_variants.items():
-            usdVariants = value["usdVariants"]
-            for key, value in usdVariants.items():
-                tempPath = str(key).split('/')[0]
-                temp = str(value["variantSet"])
-                if tempPath == 'CHASSIS':
-                    mesh = bpy.data.objects[temp]
-                    mesh.active_material = mat_chassis
-                if tempPath == 'EXTERIOR':
-                    mesh = bpy.data.objects[temp]
-                    mesh.active_material = mat_exterior
-                if tempPath == 'INTERIOR':
-                    mesh = bpy.data.objects[temp]
-                    mesh.active_material = mat_interior
-
-
 def change_car_paint(car_paint = 'GAT'):
     try:
         mat_exterior = bpy.data.materials[car_paint]        
@@ -124,7 +79,6 @@ def change_car_paint(car_paint = 'GAT'):
         m = random.random()
         roug = random.random()
         ior = random.random() * random.randint(1, 3)
-        # print(f'Ref:{r}, Blue:{b}, green: {g}')
         principled_node = mat_exterior.node_tree.nodes.get('Principled BSDF')
         principled_node.inputs[0].default_value = (r, g, b, 1)
         principled_node.inputs[1].default_value = m
@@ -152,14 +106,11 @@ def change_car_paint(car_paint = 'GAT'):
 def change_interior_trim(interior_trim = 'A'):
     result = use_dll(interior=interior_trim)
     result = json.loads(result)
-    # {"Path":"Materials/S_DOOR_INSERTS_INNER_","State":"JG77_","Variant":"S_DOOR_INSERTS_INNER_"}
     for i in result:
         temp_path = str(i["Path"]).split('/')
         if temp_path[0] == "Materials" and temp_path[1] != 'Colors':
-            # print(f'First: {temp_path[0]} and second: {temp_path[1]}\n')
             mat_name = i["State"]
             mesh_name = i["Variant"]
-    
             try:
                 mat_interior = bpy.data.materials[mat_name]        
             except:
@@ -171,7 +122,6 @@ def change_interior_trim(interior_trim = 'A'):
                 m = random.random()
                 roug = random.random()
                 ior = random.random() * random.randint(1, 3)
-                # print(f'Ref:{r}, Blue:{b}, green: {g}')
                 principled_node = mat_interior.node_tree.nodes.get('Principled BSDF')
                 principled_node.inputs[0].default_value = (r, g, b, 1)
                 principled_node.inputs[1].default_value = m
@@ -180,11 +130,9 @@ def change_interior_trim(interior_trim = 'A'):
                 try:
                     mesh = bpy.data.objects[mesh_name]
                     mesh.active_material = mat_interior
-                    # print(f'Material changed on: {mesh_name}')
                 except:
                     print(f"Mesh: {mesh_name} doesn't exist in scene")
                         
-            
             
 def read_all_emis():
     eim_list = []
@@ -195,7 +143,6 @@ def read_all_emis():
         preset = metaVariant["Preset"]
         int_variants = preset["variants"]
         for key, value in int_variants.items():
-            # print(f'Matvariants config KEY       : {key} \n')
             eim_list.append(key)
     return eim_list
 
@@ -209,9 +156,9 @@ def read_all_carpaints():
         preset = metaVariant["Paint"]
         int_variants = preset["variants"]
         for key, value in int_variants.items():
-            # print(f'Matvariants config KEY       : {key} \n')
             eim_list.append(key)
     return eim_list
+
 
 def read_all_interior_trim():
     eim_list = []
@@ -222,18 +169,6 @@ def read_all_interior_trim():
         preset = metaVariant["Interior"]
         int_variants = preset["variants"]
         for key, value in int_variants.items():
-            # print(f'Matvariants config KEY       : {key} \n')
             eim_list.append(key)
     return eim_list
 
-def create_rig():
-    pattern = f'(def Xform [ "A-Za-z_]+)'
-    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\RigData.usda', 'r') as data:
-        whole_data = data.read()
-        idx = whole_data.index('def Xform "RIG_Main"') -1 
-        last_bracket_idx = whole_data.rindex('}')
-        out = re.findall(pattern, whole_data[idx:last_bracket_idx])
-        i_name = str(out[0][:-1]).strip().split('"')[-1]
-        if not i_name:
-            i_name  = str(out[0][:-1]).strip().split('"')[-2]
-        create_and_parent(whole_data[idx: last_bracket_idx])

@@ -1,12 +1,12 @@
 import glob, sys, time, math, random, asyncio, bpy, os, re, io, json, ctypes
 from ctypes import *
 
-
 object_to_hide = []
 car_meshes = {}
 curent_car_paint = 'GAT'
 curent_interior_trim = 'A'
 curent_eim = 'GLVALG2Z34ZUA-----'
+
 
 def remove_object(context, obj_to_remove):
     if obj_to_remove == None:
@@ -16,7 +16,6 @@ def remove_object(context, obj_to_remove):
 
 
 def add_cube():
-    # bpy.ops.mesh.primitive_cube_add()
     cube = bpy.ops.mesh.primitive_cube_add(size=4, location=(0, 0, 0))
     new_mat = bpy.data.materials.new(name="Material")
     new_mat.use_nodes = True
@@ -24,7 +23,6 @@ def add_cube():
     color_ramp = new_mat.node_tree.nodes.new("ShaderNodeValToRGB")
     color_ramp.color_ramp.elements[0].color = (1.0, 1.0, 1.0, 1)
     new_mat.node_tree.links.new(bsdf.inputs['Base Color'], color_ramp.outputs['Color'])
-
     cube = bpy.context.selected_objects
     for obj in cube:
         obj.data.materials.append(new_mat)
@@ -43,7 +41,6 @@ def randomMove(context, cube):
 def diffMate(context, cube):
     if cube is None or cube is []:
         cube = bpy.context.object
-        # print(cube)
     if cube is not None:
         try:
             material_basic = bpy.data.materials['Basic Mat']        
@@ -57,7 +54,6 @@ def diffMate(context, cube):
         m = random.random()
         roug = random.random()
         ior = random.random() * random.randint(1, 3)
-        # print(f'Ref:{r}, Blue:{b}, green: {g}')
         principled_node.inputs[0].default_value = (r, g, b, 1)
         principled_node.inputs[1].default_value = m
         principled_node.inputs[2].default_value = roug
@@ -136,7 +132,6 @@ def save_scene(context, filepath = 'D:\BlenderAddons\Scenes\Test'):
     while os.path.exists(filepath):
         filepath = f'{filename}({counter}){extension}'
         counter += 1
-
     bpy.ops.wm.save_as_mainfile(filepath=f'{filepath}')
     t_end = time.time()
     print(f'Scene saved to: {filepath}, took: {t_end - t_start} sec')
@@ -150,7 +145,6 @@ def create_and_parent(whole_data: str):
         if temp:
             indent = n.index(temp[0])
             temp_name = temp[0].strip().split('"')[-2]
-            # print(f'TEMP NAME:: \n\n\n {temp_name}' )
             bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
             temp_obj = bpy.context.active_object
             temp_obj.name = temp_name
@@ -161,9 +155,54 @@ def create_and_parent(whole_data: str):
                 a = objects[memo[indent-4]]
                 b = objects[temp_name]
                 b.parent = a
-            # print(f'{temp_name} line {indent}')
             memo[indent] = temp_name
     return memo
+
+def fake_material():
+    try:
+        mat_chassis = bpy.data.materials['Mat CHASSIS']        
+    except:
+        mat_chassis = bpy.data.materials.new(name='Mat CHASSIS')
+    mat_chassis.use_nodes = True
+    principled_node = mat_chassis.node_tree.nodes.get('Principled BSDF')
+    principled_node.inputs[0].default_value = (.1, .1, .1, 1)
+    
+    try:
+        mat_exterior = bpy.data.materials['Mat EXTERIOR']        
+    except:
+        mat_exterior = bpy.data.materials.new(name='Mat EXTERIOR')
+    mat_exterior.use_nodes = True
+    principled_node = mat_exterior.node_tree.nodes.get('Principled BSDF')
+    principled_node.inputs[0].default_value = (.9, .1, .4, 1)
+    
+    try:
+        mat_interior = bpy.data.materials['Mat INTERIOR']        
+    except:
+        mat_interior = bpy.data.materials.new(name='Mat INTERIOR')
+    mat_interior.use_nodes = True
+    principled_node = mat_interior.node_tree.nodes.get('Principled BSDF')
+    principled_node.inputs[0].default_value = (.2, .8, .3, 1)
+    
+    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
+        t_config = config.read()
+        g_config = json.loads(t_config)
+        metaVariant = g_config['metaVariantSets']
+        preset = metaVariant["Preset"]
+        int_variants = preset["variants"]
+        for key, value in int_variants.items():
+            usdVariants = value["usdVariants"]
+            for key, value in usdVariants.items():
+                tempPath = str(key).split('/')[0]
+                temp = str(value["variantSet"])
+                if tempPath == 'CHASSIS':
+                    mesh = bpy.data.objects[temp]
+                    mesh.active_material = mat_chassis
+                if tempPath == 'EXTERIOR':
+                    mesh = bpy.data.objects[temp]
+                    mesh.active_material = mat_exterior
+                if tempPath == 'INTERIOR':
+                    mesh = bpy.data.objects[temp]
+                    mesh.active_material = mat_interior
 
 def create_rig():
     pattern = f'(def Xform [ "A-Za-z_]+)'
