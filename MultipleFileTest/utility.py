@@ -1,6 +1,7 @@
-import glob, sys, time, math, random, asyncio, bpy, os, re
+import glob, sys, time, math, random, asyncio, bpy, os, re, io
 from ctypes import *
 import json, ctypes
+
 
 object_to_hide = []
 car_meshes = {}
@@ -379,52 +380,29 @@ def read_all_interior_trim():
             eim_list.append(key)
     return eim_list
 
-def assigne_parents(previous_obj, data:str, idx):
-    pattern = f'(def Xform [ "A-Za-z_]+)'
-    try:
-        out = re.findall(pattern, data)
-        for i in out:
-                i_name = str(i[:-1]).strip().split('"')[-1]
-                if not i_name:
-                    i_name  = str(i[:-1]).strip().split('"')[-2]
-                i_idx = data[idx:].index(i_name) + idx
-                bracket_idx = data[i_idx:].index('}')
-                print(f'bracket_idx:         {bracket_idx}\n')
-                bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
-                temp = bpy.context.active_object
-                temp.name = i_name
-                temp.parent = previous_obj
-                try:
-                    next_obj = re.findall(pattern, data[i_idx:])[0]
-                    next_obj_idx = data[i_idx:].index(next_obj)
-                    print(f'next_obj idx:         {next_obj_idx}\n')
-                    print(f'Prev: {previous_obj.name}, next: {i_name}, have child: {next_obj_idx < bracket_idx}')
-                    assigne_parents(temp, data, idx + next_obj_idx + i_idx)
-                except:
-                    print('LAST!!!!!!!!')
-                    return False
-    except:
-        print('LASTER')
-        return False
-        
-    return True
     
-def parenting(whole_data, id, memo= []):
+def create_and_parent(whole_data: str):
+    memo = {}
     pattern = f'(def Xform [ "A-Za-z_]+)'
-    last_bracket_idx = whole_data.rindex('}')
-    first_bracket_idx = whole_data.index('}') 
-    out = re.findall(pattern, whole_data[1:last_bracket_idx])
-    try:
-        idx = whole_data.index(out[0])
-    except:
-        return
-    i_name = str(out[0][:-1]).strip().split('"')[-1]
-    if not i_name:
-        i_name  = str(out[0][:-1]).strip().split('"')[-2]
-    # print(f'Name: {i_name}, index: {idx + id}, last index: {last_bracket_idx + id}')
-    temp = (i_name, idx + id, last_bracket_idx + id, first_bracket_idx + id)
-    memo.append(temp)
-    parenting(whole_data[idx: last_bracket_idx], idx + id)
+    buf = whole_data.splitlines()
+    for n in buf:
+        temp = re.findall(pattern, n)
+        if temp:
+            indent = n.index(temp[0])
+            temp_name = temp[0].strip().split('"')[-2]
+            # print(f'TEMP NAME:: \n\n\n {temp_name}' )
+            bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
+            temp_obj = bpy.context.active_object
+            temp_obj.name = temp_name
+            objects = bpy.data.objects
+            if indent == 1:
+                indent = 4
+            else:
+                a = objects[memo[indent-4]]
+                b = objects[temp_name]
+                b.parent = a
+            # print(f'{temp_name} line {indent}')
+            memo[indent] = temp_name
     return memo
                     
 
@@ -438,38 +416,7 @@ def create_rig():
         i_name = str(out[0][:-1]).strip().split('"')[-1]
         if not i_name:
             i_name  = str(out[0][:-1]).strip().split('"')[-2]
-        bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
-        temp = bpy.context.active_object
-        temp.name = i_name
-
-        # print(f'Name: {i_name}, index: {idx}, last index: {last_bracket_idx}')
-        obj_ranges = parenting(whole_data[idx: last_bracket_idx], idx)
-        # print(obj_ranges)
-        for n in obj_ranges:
-            # print(n)
-            bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
-            temp = bpy.context.active_object
-            temp.name = n[0]
-        for i in range(len(obj_ranges)-1):
-            print(obj_ranges[i])
-            for j in range(i+1, len(obj_ranges)):
-                # print(f'Min: {obj_ranges[i][1] - obj_ranges[j][1]}  max : {obj_ranges[i][2] - obj_ranges[j][2]} ')
-                if (int(obj_ranges[i][1]) < int(obj_ranges[j][1])) and (int(obj_ranges[i][2]) > int(obj_ranges[j][2])) and (int(obj_ranges[i][1]) < int(obj_ranges[j][3])):
-                    # print(f'Parenting: {obj_ranges[j][0]} to {obj_ranges[i][0]} \n')
-                    objects = bpy.data.objects
-                    a = objects[obj_ranges[i][0]]
-                    b = objects[obj_ranges[j][0]]
-                    b.parent = a
-            
-        # work = True
-        # while work:
-        #     work = assigne_parents(temp, whole_data, idx + 10)
-        
-        # print(f'{out}')
-        # objects = bpy.data.objects
-        # a = objects['Cube']
-        # b = objects['Cube.001']
-        # b.parent = a
+        create_and_parent(whole_data[idx: last_bracket_idx])
         
         
     
