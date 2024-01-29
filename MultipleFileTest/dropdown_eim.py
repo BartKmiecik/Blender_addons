@@ -1,13 +1,12 @@
 from bpy.types import Operator
 from bpy.props import EnumProperty
-from . import utility
-
+from . import utility_variants
 
 class DropdownEIM(Operator):
     bl_idname = 'test.dropdown_eim'
     bl_label = 'Select EIM'
     
-    eim_list = utility.read_all_emis()
+    eim_list = utility_variants.read_all_emis()
     temp_enum = []
     for i in range(len(eim_list)):
         temp_enum.append((eim_list[i], eim_list[i], eim_list[i]))  
@@ -32,6 +31,6 @@ class DropdownEIM(Operator):
         self.__class__.selected_eim = self.car_eims
         self.report({'INFO'}, str(self.__class__.selected_eim))
         print(f'EIM SELECTED: {self.selected_eim}')
-        variant = utility.use_dll(eim = self.selected_eim)
-        utility.select_variant(variant=variant)
+        variant = utility_variants.use_dll(eim = self.selected_eim)
+        utility_variants.select_variant(variant=variant)
         return {'FINISHED'}

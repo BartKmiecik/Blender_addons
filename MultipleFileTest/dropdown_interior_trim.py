@@ -1,13 +1,13 @@
 from bpy.types import Operator
 from bpy.props import EnumProperty
-from . import utility
+from . import utility_variants
 
 
 class DropdownInteriorTrim(Operator):
     bl_idname = 'test.dropdown_interior_trim'
     bl_label = 'Select Carpaint'
     
-    eim_list = utility.read_all_interior_trim()
+    eim_list = utility_variants.read_all_interior_trim()
     temp_enum = []
     for i in range(len(eim_list)):
         temp_enum.append((eim_list[i], eim_list[i], eim_list[i]))  
@@ -33,5 +33,5 @@ class DropdownInteriorTrim(Operator):
         self.report({'INFO'}, str(self.__class__.selected_interior_trim))
         print(f'Interior SELECTED: {self.selected_interior_trim}')
         # variant = utility.use_dll(interior = self.selected_interior_trim)
-        utility.change_interior_trim(interior_trim=self.selected_interior_trim)
+        utility_variants.change_interior_trim(interior_trim=self.selected_interior_trim)
         return {'FINISHED'}

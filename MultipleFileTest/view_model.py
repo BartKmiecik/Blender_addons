@@ -1,4 +1,5 @@
 from . import utility
+from . import utility_variants
 import asyncio, bpy
 from bpy.props import EnumProperty
 from bpy.types import Operator
@@ -113,16 +114,16 @@ class ViewModelOperator(Operator, AddObjectHelper):
 
     @staticmethod
     def use_dll(context, eim = "GLVALG2Z34ZUA-----"):
-        return utility.use_dll()
+        return utility_variants.use_dll()
 
     @staticmethod
     def fake_material(self):
-        utility.fake_material()
+        utility_variants.fake_material()
         
     @staticmethod
     def select_variant(self, context):
         variant = self.use_dll(context)
-        utility.select_variant(variant)
+        utility_variants.select_variant(variant)
         
     @staticmethod
     def create_rig():
