@@ -136,27 +136,6 @@ def save_scene(context, filepath = 'D:\BlenderAddons\Scenes\Test'):
     t_end = time.time()
     print(f'Scene saved to: {filepath}, took: {t_end - t_start} sec')
 
-def create_and_parent(whole_data: str):
-    memo = {}
-    pattern = f'(def Xform [ "A-Za-z_]+)'
-    buf = whole_data.splitlines()
-    for n in buf:
-        temp = re.findall(pattern, n)
-        if temp:
-            indent = n.index(temp[0])
-            temp_name = temp[0].strip().split('"')[-2]
-            bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
-            temp_obj = bpy.context.active_object
-            temp_obj.name = temp_name
-            objects = bpy.data.objects
-            if indent == 1:
-                indent = 4
-            else:
-                a = objects[memo[indent-4]]
-                b = objects[temp_name]
-                b.parent = a
-            memo[indent] = temp_name
-    return memo
 
 def fake_material():
     try:
@@ -204,8 +183,53 @@ def fake_material():
                     mesh = bpy.data.objects[temp]
                     mesh.active_material = mat_interior
 
+
+def create_and_parent(whole_data: str):
+    memo = {}
+    pattern = f'(def Xform [ "A-Za-z_]+)'
+    loc_pattern = f'double3 xformOp:translate = [()-? 0-9.,e]+'
+    rot_pattern = f'float3 xformOp:rotateXYZ = [()-? 0-9.,e]+'
+    buf = whole_data.splitlines()
+    for n in buf:
+        temp = re.findall(pattern, n)
+        loc_temp = re.findall(loc_pattern, n)
+        rot_temp = re.findall(rot_pattern, n)
+        if temp:
+            indent = n.index(temp[0])
+            temp_name = temp[0].strip().split('"')[-2]
+            bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
+            temp_obj = bpy.context.active_object
+            temp_obj.name = temp_name
+            objects = bpy.data.objects
+            if indent == 1:
+                indent = 4
+            else:
+                a = objects[memo[indent-4]]
+                b = objects[temp_name]
+                b.parent = a
+            memo[indent] = temp_name
+        if loc_temp:
+            str_vector = loc_temp[0][:-1].split('(')[-1]
+            # print(f"str_vector :{str_vector}")
+            print(f'VECTOR           : {str_vector}')
+            x,y,z = str(str_vector).split(',')
+            # print(f'X: {x}, y: {y}, z: {z}')
+            temp_obj.location = (float(x), -float(z), float(y))
+        if rot_temp:
+            # print(f"Rot :{rot_temp[0]}")
+            str_vector = rot_temp[0][:-1].split('(')[-1]
+            print(f'VECTOR           : {str_vector}')
+            # print(f"str_vector :{str_vector}")
+            x,y,z = str(str_vector).split(',')
+            # print(f'X: {x}, y: {y}, z: {z}')
+            temp_obj.rotation_euler = (float(x), -float(z), float(y))
+    return memo
+
+
 def create_rig():
     pattern = f'(def Xform [ "A-Za-z_]+)'
+    # loc_pattern = f'double3 xformOp:translate = [() -0-9.,)]+'
+    # rot_pattern = f'float3 xformOp:rotateXYZ = [() -0-9.,)]+'
     with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\RigData.usda', 'r') as data:
         whole_data = data.read()
         idx = whole_data.index('def Xform "RIG_Main"') -1 
@@ -215,3 +239,12 @@ def create_rig():
         if not i_name:
             i_name  = str(out[0][:-1]).strip().split('"')[-2]
         create_and_parent(whole_data[idx: last_bracket_idx])
+        
+        
+# async def open_new_window():
+#     await asyncio.sleep(1)
+#     print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+#     bpy.ops.screen.userpref_show("INVOKE_DEFAULT")
+#     area = bpy.context.window_manager.windows[-1].screen.areas[0]
+#     area.type = 'NODE_EDITOR'
+#     area.ui_type = 'CompositorNodeTree'
