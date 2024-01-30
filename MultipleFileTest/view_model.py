@@ -4,6 +4,28 @@ import asyncio, bpy
 from bpy.props import EnumProperty
 from bpy.types import Operator
 from bpy_extras.object_utils import AddObjectHelper
+from bpy.app.handlers import persistent
+
+
+@persistent
+def load_handler(dummy):
+    open_new_window()
+
+bpy.app.handlers.load_post.append(load_handler)
+        
+
+def open_new_window():
+    render = bpy.context.scene.render
+    render.resolution_x = 180
+    render.resolution_y = 480
+    render.resolution_percentage = 100
+    prefs = bpy.context.preferences
+    prefs.view.render_display_type = "WINDOW"
+    bpy.ops.render.view_show("INVOKE_DEFAULT")
+    area = bpy.context.window_manager.windows[-1].screen.areas[0]
+    area.type = 'NODE_EDITOR'
+    area.ui_type = 'CompositorNodeTree'
+
 
 class ViewModelOperator(Operator, AddObjectHelper):
     bl_idname = 'test.test_op'
@@ -31,8 +53,11 @@ class ViewModelOperator(Operator, AddObjectHelper):
             ('CREATE_RIG', 'create rig', 'create rig')
         ]
     )
-
-
+    
+    @classmethod
+    def poll(cls, context):
+        return context.active_object is not None
+    
     def execute(self, context):
         if self.action == 'ADD_CUBE':
             self.add_cube()
@@ -66,6 +91,7 @@ class ViewModelOperator(Operator, AddObjectHelper):
         elif self.action == 'CREATE_RIG':
             self.create_rig()
         return {'FINISHED'}
+    
  
  
     @staticmethod

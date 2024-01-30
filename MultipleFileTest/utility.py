@@ -211,14 +211,14 @@ def create_and_parent(whole_data: str):
         if loc_temp:
             str_vector = loc_temp[0][:-1].split('(')[-1]
             # print(f"str_vector :{str_vector}")
-            print(f'VECTOR           : {str_vector}')
+            # print(f'VECTOR           : {str_vector}')
             x,y,z = str(str_vector).split(',')
             # print(f'X: {x}, y: {y}, z: {z}')
             temp_obj.location = (float(x), -float(z), float(y))
         if rot_temp:
             # print(f"Rot :{rot_temp[0]}")
             str_vector = rot_temp[0][:-1].split('(')[-1]
-            print(f'VECTOR           : {str_vector}')
+            # print(f'VECTOR           : {str_vector}')
             # print(f"str_vector :{str_vector}")
             x,y,z = str(str_vector).split(',')
             # print(f'X: {x}, y: {y}, z: {z}')
@@ -230,7 +230,7 @@ def create_rig():
     pattern = f'(def Xform [ "A-Za-z_]+)'
     # loc_pattern = f'double3 xformOp:translate = [() -0-9.,)]+'
     # rot_pattern = f'float3 xformOp:rotateXYZ = [() -0-9.,)]+'
-    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\RigData.usda', 'r') as data:
+    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\RigData3.usda', 'r') as data:
         whole_data = data.read()
         idx = whole_data.index('def Xform "RIG_Main"') -1 
         last_bracket_idx = whole_data.rindex('}')
@@ -240,11 +240,7 @@ def create_rig():
             i_name  = str(out[0][:-1]).strip().split('"')[-2]
         create_and_parent(whole_data[idx: last_bracket_idx])
         
+    # print("BBBBBBBBBBB")
         
-# async def open_new_window():
-#     await asyncio.sleep(1)
-#     print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-#     bpy.ops.screen.userpref_show("INVOKE_DEFAULT")
-#     area = bpy.context.window_manager.windows[-1].screen.areas[0]
-#     area.type = 'NODE_EDITOR'
-#     area.ui_type = 'CompositorNodeTree'
+        
+
