@@ -10,22 +10,30 @@ from bpy.app.handlers import persistent
 @persistent
 def load_handler(dummy):
     open_new_window()
+    # asyncio.run(test()
 
 bpy.app.handlers.load_post.append(load_handler)
-        
+
+async def test():
+    await asyncio.sleep(5)
+    print('WAINTED\n\n\n\n')
+    await asyncio.sleep(10)
+    pass
 
 def open_new_window():
-    render = bpy.context.scene.render
-    render.resolution_x = 180
-    render.resolution_y = 480
-    render.resolution_percentage = 100
-    prefs = bpy.context.preferences
-    prefs.view.render_display_type = "WINDOW"
-    bpy.ops.render.view_show("INVOKE_DEFAULT")
-    area = bpy.context.window_manager.windows[-1].screen.areas[0]
-    area.type = 'NODE_EDITOR'
-    area.ui_type = 'CompositorNodeTree'
-
+    # prefs = bpy.context.preferences
+    # prefs.view.render_display_type = "WINDOW"
+    for area in bpy.data.screens['Layout'].areas:
+        print(f'AAAAAAAAAAAAAAAAAAAAAA : {area.type}')
+        if area.type == 'PROPERTIES': # 'VIEW_3D', 'CONSOLE', 'INFO' etc. 
+            with bpy.context.temp_override(area=area):
+                # bpy.ops.screen.area_split(direction='VERTICAL', factor=0.5)
+                bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
+                area = bpy.context.window_manager.windows[-1].screen.areas[0]
+                area.type = 'NODE_EDITOR'
+                area.ui_type = 'CompositorNodeTree'
+                bpy.context.space_data.show_region_ui = True
+                        
 
 class ViewModelOperator(Operator, AddObjectHelper):
     bl_idname = 'test.test_op'
@@ -54,9 +62,9 @@ class ViewModelOperator(Operator, AddObjectHelper):
         ]
     )
     
-    @classmethod
-    def poll(cls, context):
-        return context.active_object is not None
+    # @classmethod
+    # def poll(cls, context):
+    #     return context.active_object is not None
     
     def execute(self, context):
         if self.action == 'ADD_CUBE':

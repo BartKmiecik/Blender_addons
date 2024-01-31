@@ -40,7 +40,7 @@ class Test_Panel(bpy.types.Panel):
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_context = "View"
-    bl_category = 'Katana'
+    bl_category = 'Tool'
     
     # bl_options = {'DEFAULT_OPEN'}
     
