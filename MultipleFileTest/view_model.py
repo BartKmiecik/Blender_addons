@@ -33,7 +33,9 @@ def open_new_window():
                 area.type = 'NODE_EDITOR'
                 area.ui_type = 'CompositorNodeTree'
                 bpy.context.space_data.show_region_ui = True
-                        
+                bpy.ops.screen.header_toggle_menus()
+                bpy.context.space_data.show_region_header = False
+                
 
 class ViewModelOperator(Operator, AddObjectHelper):
     bl_idname = 'test.test_op'
