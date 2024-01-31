@@ -23,7 +23,7 @@ def use_dll(interior = curent_interior_trim, carpaint = curent_car_paint, eim = 
     curent_interior_trim = interior
     curent_car_paint = carpaint
     curent_eim = eim
-    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson2.json', 'r') as config:
+    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
         t_config = config.read()
         g_config = json.loads(t_config)
         h_config = json.dumps(g_config).encode("utf-8")

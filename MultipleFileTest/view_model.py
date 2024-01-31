@@ -154,7 +154,7 @@ class ViewModelOperator(Operator, AddObjectHelper):
 
     @staticmethod
     def fake_material(self):
-        utility_variants.fake_material()
+        utility.fake_material()
         
     @staticmethod
     def select_variant(self, context):
