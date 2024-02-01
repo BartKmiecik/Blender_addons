@@ -10,21 +10,15 @@ from bpy.app.handlers import persistent
 @persistent
 def load_handler(dummy):
     open_new_window()
-    # asyncio.run(test()
+
 
 bpy.app.handlers.load_post.append(load_handler)
 
-async def test():
-    await asyncio.sleep(5)
-    print('WAINTED\n\n\n\n')
-    await asyncio.sleep(10)
-    pass
 
 def open_new_window():
     # prefs = bpy.context.preferences
     # prefs.view.render_display_type = "WINDOW"
     for area in bpy.data.screens['Layout'].areas:
-        print(f'AAAAAAAAAAAAAAAAAAAAAA : {area.type}')
         if area.type == 'PROPERTIES': # 'VIEW_3D', 'CONSOLE', 'INFO' etc. 
             with bpy.context.temp_override(area=area):
                 # bpy.ops.screen.area_split(direction='VERTICAL', factor=0.5)
@@ -59,7 +53,7 @@ class ViewModelOperator(Operator, AddObjectHelper):
             ("SAVE_SCENE", 'save scene', 'save scene'),
             ("USE_DLL", 'use dll', 'use dll'),
             ("SELECT_VARIANT", 'select variant', 'select variant'),
-            ("FAKE_MATERIALS", 'fake mate', 'fake mate'),
+            ("ASSIGNE_MATERIALS", 'assigne mate', 'assigne mate'),
             ('CREATE_RIG', 'create rig', 'create rig')
         ]
     )
@@ -96,8 +90,8 @@ class ViewModelOperator(Operator, AddObjectHelper):
             self.use_dll(self,context)
         elif self.action == 'SELECT_VARIANT':
             self.select_variant(self,context)
-        elif self.action == 'FAKE_MATERIALS':
-            self.fake_material(self)
+        elif self.action == 'ASSIGNE_MATERIALS':
+            self.assignee_material(self)
         elif self.action == 'CREATE_RIG':
             self.create_rig()
         return {'FINISHED'}
@@ -153,8 +147,8 @@ class ViewModelOperator(Operator, AddObjectHelper):
         return utility_variants.use_dll()
 
     @staticmethod
-    def fake_material(self):
-        utility.fake_material()
+    def assignee_material(self):
+        utility.assignee_material()
         
     @staticmethod
     def select_variant(self, context):

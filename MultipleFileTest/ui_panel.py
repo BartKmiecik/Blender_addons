@@ -22,7 +22,7 @@ class Side_Panel(bpy.types.Panel):
         layout.row().operator('test.test_op', text='Unhide all').action = 'UNHIDE_RANDOM'
         # layout.row().operator('test.test_op', text='Use Dll').action = 'USE_DLL'
         layout.row().operator('test.test_op', text='Select Variant').action = 'SELECT_VARIANT'
-        layout.row().operator('test.test_op', text='Fake Materials').action = 'FAKE_MATERIALS'
+        layout.row().operator('test.test_op', text='Assigne Materials').action = 'ASSIGNE_MATERIALS'
         layout.row().operator('test.test_op', text='Save scene').action = 'SAVE_SCENE'
         layout.row().label(text=f'EIM: {str(dropdown_eim.DropdownEIM.selected_eim)}')
         layout.row().operator('test.dropdown_eim', text='Select EIM')
@@ -63,7 +63,7 @@ class Test_Panel(bpy.types.Panel):
         layout.row().operator('test.test_op', text='Unhide all').action = 'UNHIDE_RANDOM'
         # layout.row().operator('test.test_op', text='Use Dll').action = 'USE_DLL'
         layout.row().operator('test.test_op', text='Select Variant').action = 'SELECT_VARIANT'
-        layout.row().operator('test.test_op', text='Fake Materials').action = 'FAKE_MATERIALS'
+        layout.row().operator('test.test_op', text='Assigne Materials').action = 'ASSIGNE_MATERIALS'
         layout.row().operator('test.test_op', text='Save scene').action = 'SAVE_SCENE'
         layout.row().label(text=f'EIM: {str(dropdown_eim.DropdownEIM.selected_eim)}')
         layout.row().operator('test.dropdown_eim', text='Select EIM')

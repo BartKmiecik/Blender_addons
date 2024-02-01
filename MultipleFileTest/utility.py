@@ -1,4 +1,4 @@
-import glob, sys, time, math, random, asyncio, bpy, os, re, io, json, ctypes
+import glob, sys, time, math, random, asyncio, bpy, os, re, io, json, ctypes, re
 from ctypes import *
 
 object_to_hide = []
@@ -7,6 +7,7 @@ curent_car_paint = 'GAT'
 curent_interior_trim = 'A'
 curent_eim = 'GLVALG2Z34ZUA-----'
 
+alembic_meshes = []
 
 def remove_object(context, obj_to_remove):
     if obj_to_remove == None:
@@ -68,17 +69,34 @@ def diffMate(context, cube):
         material_basic.node_tree.links.new(textur_node.outputs[0], principled_node.inputs[0])
         cube.active_material = material_basic
 
+def getChildren(myObject, children = []): 
+    # children = [] 
+    for ob in bpy.data.objects: 
+        if ob.parent == myObject: 
+            children.append(ob)
+            getChildren(ob, children)
+    return children 
 
 def abc_import_synconus(self, context):
+    global alembic_meshes
+    alembic_meshes.clear()
     abc_list = list(glob.glob("D:\\alembicCar\\*"))
     t_start = time.time()
     for n in abc_list:
         bpy.ops.wm.alembic_import(filepath=n, relative_path=True, as_background_job=False)
         try:
             tem_name = os.path.basename(n).split('.')[0]
+            # h = len(tem_name) + 1
+            # tem_name = tem_name[:min(63, h)]
             obj = bpy.context.object
             obj.name = tem_name
             self.car_meshes[tem_name] = True
+            childs = getChildren(obj)
+            for child in childs:
+                print(child)
+                if child.type == 'MESH' and not child.name in alembic_meshes:
+                    alembic_meshes.append(child.name)
+                    
         except:
             print('Missing mesh')
     t_end = time.time()
@@ -87,13 +105,22 @@ def abc_import_synconus(self, context):
 
 
 def get_all():
+    global alembic_meshes
+    alembic_meshes.clear()
+    # abc_list = list(glob.glob("D:\\alembicCar\\*"))
+    # tem_name = os.path.basename(n).split('.')[0]
+    # old_to_new_name
+    
     t_start = time.time()
     car_meshes.clear()
     for ob in bpy.data.objects:
         _name = ob.name
+        if ob.type == 'MESH' and not ob.name in alembic_meshes:
+            alembic_meshes.append(ob.name)
         car_meshes[_name] = not bpy.data.objects[_name].hide_viewport
     t_end = time.time()
     print(f'Select all objects in scene: {t_end - t_start}, objects: {len(car_meshes)}')
+    # print(alembic_meshes)
     return car_meshes
 
 
@@ -137,51 +164,106 @@ def save_scene(context, filepath = 'D:\BlenderAddons\Scenes\Test'):
     print(f'Scene saved to: {filepath}, took: {t_end - t_start} sec')
 
 
-def fake_material():
-    try:
-        mat_chassis = bpy.data.materials['Mat CHASSIS']        
-    except:
-        mat_chassis = bpy.data.materials.new(name='Mat CHASSIS')
-    mat_chassis.use_nodes = True
-    principled_node = mat_chassis.node_tree.nodes.get('Principled BSDF')
-    principled_node.inputs[0].default_value = (.1, .1, .1, 1)
-    
-    try:
-        mat_exterior = bpy.data.materials['Mat EXTERIOR']        
-    except:
-        mat_exterior = bpy.data.materials.new(name='Mat EXTERIOR')
-    mat_exterior.use_nodes = True
-    principled_node = mat_exterior.node_tree.nodes.get('Principled BSDF')
-    principled_node.inputs[0].default_value = (.9, .1, .4, 1)
-    
-    try:
-        mat_interior = bpy.data.materials['Mat INTERIOR']        
-    except:
-        mat_interior = bpy.data.materials.new(name='Mat INTERIOR')
-    mat_interior.use_nodes = True
-    principled_node = mat_interior.node_tree.nodes.get('Principled BSDF')
-    principled_node.inputs[0].default_value = (.2, .8, .3, 1)
-    
-    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
+def assignee_material():
+    print('Assigne Mat')
+    global alembic_meshes 
+    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\MaterialAssignments.json', 'r') as config:
         t_config = config.read()
         g_config = json.loads(t_config)
-        metaVariant = g_config['metaVariantSets']
-        preset = metaVariant["Preset"]
-        int_variants = preset["variants"]
-        for key, value in int_variants.items():
-            usdVariants = value["usdVariants"]
-            for key, value in usdVariants.items():
-                tempPath = str(key).split('/')[0]
-                temp = str(value["variantSet"])
-                if tempPath == 'CHASSIS':
-                    mesh = bpy.data.objects[temp]
-                    mesh.active_material = mat_chassis
-                if tempPath == 'EXTERIOR':
-                    mesh = bpy.data.objects[temp]
-                    mesh.active_material = mat_exterior
-                if tempPath == 'INTERIOR':
-                    mesh = bpy.data.objects[temp]
-                    mesh.active_material = mat_interior
+        
+        # print(f'Material: {g_config["A54_"]}')
+        for key in g_config:
+            try:
+                mat = bpy.data.materials[key]        
+            except:
+                mat = bpy.data.materials.new(name=key)
+            mat.use_nodes = True
+            r = random.random()
+            g = random.random()
+            b = random.random()
+            m = random.random()
+            roug = random.random()
+            ior = random.random() * random.randint(1, 3)
+            principled_node = mat.node_tree.nodes.get('Principled BSDF')
+            principled_node.inputs[0].default_value = (r, g, b, 1)
+            principled_node.inputs[1].default_value = m
+            principled_node.inputs[2].default_value = roug
+            principled_node.inputs[3].default_value = ior
+            principled_node.inputs[0].default_value = (.1, .1, .1, 1)
+        
+        
+            for value in g_config[key]:
+                mesh_name = str(value).split('/')[-1]
+                if mesh_name == '_NML37753545_AA_021_FR_BMPR_Styling220218_Without_LIC_1052497_09':
+                    h = len(mesh_name) + 1
+                    temp = min(63, h)
+                    print(f'Name: {mesh_name} to new name: {mesh_name[:min(63, h)]} h:{h}')
+                    pass
+                # print(f'Material: {key}, Meshe: {mesh}')
+                try:
+                    h = len(mesh_name) + 1
+                    # print(f'\n\n\n Changed name from {mesh_name} to {mesh_name[:min(63, h)]}, h: {h}\n\n\n')
+                    mesh_name = mesh_name[:min(63, h)]
+                    mesh = bpy.data.objects[mesh_name]
+                    mesh.active_material = mat
+                    if mesh_name in alembic_meshes:
+                        alembic_meshes.remove(mesh_name)
+                except:
+                    try:
+                        parent_mesh_name = str(value).split('/')[-2]
+                        h = len(parent_mesh_name)
+                        parent_mesh_name = parent_mesh_name[:min(63, h)]
+                        mesh = bpy.data.objects[parent_mesh_name]
+                        mesh.active_material = mat
+                        if mesh_name in alembic_meshes:
+                            alembic_meshes.remove(mesh_name)    
+                        # print(f'Name changed from {mesh_name} to {parent_mesh_name}. Material changed.')
+                    except:
+                        print(f"Mesh: {mesh_name} or {parent_mesh_name} doesn't exsist on scene")
+            
+        print('Finished easy part')
+            
+        for ob in bpy.data.objects:
+            pattern = '[a-zA-Z0-9_]+'
+            _name = f'{ob.name.split(".")[0]}{pattern}'
+            if ob.type == 'MESH' and ob.name in alembic_meshes:
+                for key in g_config:
+                    for value in g_config[key]:
+                        if re.findall(_name, value):
+                            try:
+                                mat = bpy.data.materials[key]
+                                mesh = bpy.data.objects[ob.name]
+                                mesh.active_material = mat    
+                                if ob.name in alembic_meshes:
+                                    alembic_meshes.remove(ob.name)
+                            except:
+                                print('Something went wrong')
+                            break
+                        
+        print(alembic_meshes)
+        with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\Test_meshes.txt', 'w+') as dt:
+            for n in alembic_meshes:
+                dt.write(f'{n}\n')
+        
+        
+        
+        # metaVariant = g_config['metaVariantSets']
+        # preset = metaVariant["Preset"]
+        # int_variants = preset["variants"]
+        # for key, value in int_variants.items():
+        #     usdVariants = value["usdVariants"]
+        #     for key, value in usdVariants.items():
+        #         tempPath = str(key).split('/')[0]
+        #         temp = str(value["variantSet"])
+        #         if tempPath == 'CHASSIS':
+        #             mesh = bpy.data.objects[temp]
+        #             mesh.active_material = mat_chassis
+        #         if tempPath == 'EXTERIOR':
+        #             mesh = bpy.data.objects[temp]
+        #             mesh.active_material = mat_exterior
+        #         if tempPath == 'INTERIOR':
+        #             mesh = bpy.data.objects[temp]
+        #             mesh.active_material = mat_interior
 
 
 def create_and_parent(whole_data: str):
