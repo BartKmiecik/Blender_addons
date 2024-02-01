@@ -70,7 +70,6 @@ def diffMate(context, cube):
         cube.active_material = material_basic
 
 def getChildren(myObject, children = []): 
-    # children = [] 
     for ob in bpy.data.objects: 
         if ob.parent == myObject: 
             children.append(ob)

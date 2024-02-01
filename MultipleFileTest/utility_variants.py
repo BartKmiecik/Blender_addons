@@ -1,11 +1,12 @@
 import bpy, json, random, ctypes, time
 from ctypes import *
 
+all_avaliable_car_paints = []
 car_meshes = {}
 curent_car_paint = 'GAT'
 curent_interior_trim = 'A'
 curent_eim = 'GLVALG2Z34ZUA-----'
-
+car_paint_meshes = []
 
 def get_all():
     t_start = time.time()
@@ -44,6 +45,12 @@ def use_dll(interior = curent_interior_trim, carpaint = curent_car_paint, eim = 
                 dt.write(str(t_result))
     return t_result
 
+def setChildrenToo(myObject, state): 
+    for ob in bpy.data.objects: 
+        if ob.parent == myObject:
+            if ob.type == "MESH":
+                ob.hide_viewport = state    
+            setChildrenToo(ob, state)
 
 def select_variant(variant):
     if len(car_meshes) == 0:
@@ -60,6 +67,10 @@ def select_variant(variant):
         try:
             if type(state) == bool:
                 bpy.data.objects[part].hide_viewport = not state
+                setChildrenToo(bpy.data.objects[part], (not state))
+                # for child in children:
+                #     print(child)
+                #     child.hide_viewport = not state
         except:
             print(f"Mesh: {part}, doesn't exist in scene")
         t_end = time.time()
@@ -68,6 +79,20 @@ def select_variant(variant):
 
 
 def change_car_paint(car_paint = 'GAT'):
+    global car_paint_meshes, curent_car_paint
+    curent_car_paint = car_paint
+    
+    if len(car_paint_meshes) < 1:
+        for ob in bpy.data.objects: 
+            if ob.type == "MESH":
+                try:
+                    temp = ob.active_material.name
+                    print(temp)
+                    if temp == 'Colors' or temp in all_avaliable_car_paints:
+                        car_paint_meshes.append(ob.name)
+                except:
+                    print('Missing material on mesh')
+               
     try:
         mat_exterior = bpy.data.materials[car_paint]        
     except:
@@ -84,24 +109,27 @@ def change_car_paint(car_paint = 'GAT'):
         principled_node.inputs[1].default_value = m
         principled_node.inputs[2].default_value = roug
         principled_node.inputs[3].default_value = ior
+        
+    for mesh in car_paint_meshes:
+        bpy.data.objects[mesh].active_material = mat_exterior
 
-    with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
-        t_config = config.read()
-        g_config = json.loads(t_config)
-        metaVariant = g_config['metaVariantSets']
-        preset = metaVariant["Preset"]
-        int_variants = preset["variants"]
-        for key, value in int_variants.items():
-            usdVariants = value["usdVariants"]
-            for key, value in usdVariants.items():
-                tempPath = str(key).split('/')[0]
-                temp = str(value["variantSet"])
-                if tempPath == 'EXTERIOR':
-                    try:
-                        mesh = bpy.data.objects[temp]
-                        mesh.active_material = mat_exterior
-                    except:
-                        print(f"Mesh: {temp} doesn't exsist on scene")
+    # with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
+    #     t_config = config.read()
+    #     g_config = json.loads(t_config)
+    #     metaVariant = g_config['metaVariantSets']
+    #     preset = metaVariant["Preset"]
+    #     int_variants = preset["variants"]
+    #     for key, value in int_variants.items():
+    #         usdVariants = value["usdVariants"]
+    #         for key, value in usdVariants.items():
+    #             tempPath = str(key).split('/')[0]
+    #             temp = str(value["variantSet"])
+    #             if tempPath == 'EXTERIOR':
+    #                 try:
+    #                     mesh = bpy.data.objects[temp]
+    #                     mesh.active_material = mat_exterior
+    #                 except:
+    #                     print(f"Mesh: {temp} doesn't exsist on scene")
 
 def change_interior_trim(interior_trim = 'A'):
     result = use_dll(interior=interior_trim)
@@ -148,7 +176,7 @@ def read_all_emis():
 
             
 def read_all_carpaints():
-    eim_list = []
+    global all_avaliable_car_paints
     with open('D:\BlenderAddons\Blender_addons\MultipleFileTest\M_DLL\ConfigJson.json', 'r') as config:
         t_config = config.read()
         g_config = json.loads(t_config)
@@ -156,8 +184,9 @@ def read_all_carpaints():
         preset = metaVariant["Paint"]
         int_variants = preset["variants"]
         for key, value in int_variants.items():
-            eim_list.append(key)
-    return eim_list
+            all_avaliable_car_paints.append(key)
+            
+    return all_avaliable_car_paints
 
 
 def read_all_interior_trim():
