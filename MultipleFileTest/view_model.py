@@ -6,29 +6,30 @@ from bpy.types import Operator
 from bpy_extras.object_utils import AddObjectHelper
 from bpy.app.handlers import persistent
 
+# Currently disable extra window
 
-@persistent
-def load_handler(dummy):
-    open_new_window()
-
-
-bpy.app.handlers.load_post.append(load_handler)
+# @persistent
+# def load_handler(dummy):
+#     open_new_window()
 
 
-def open_new_window():
-    # prefs = bpy.context.preferences
-    # prefs.view.render_display_type = "WINDOW"
-    for area in bpy.data.screens['Layout'].areas:
-        if area.type == 'PROPERTIES': # 'VIEW_3D', 'CONSOLE', 'INFO' etc. 
-            with bpy.context.temp_override(area=area):
-                # bpy.ops.screen.area_split(direction='VERTICAL', factor=0.5)
-                bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
-                area = bpy.context.window_manager.windows[-1].screen.areas[0]
-                area.type = 'NODE_EDITOR'
-                area.ui_type = 'CompositorNodeTree'
-                bpy.context.space_data.show_region_ui = True
-                bpy.ops.screen.header_toggle_menus()
-                bpy.context.space_data.show_region_header = False
+# bpy.app.handlers.load_post.append(load_handler)
+
+
+# def open_new_window():
+#     # prefs = bpy.context.preferences
+#     # prefs.view.render_display_type = "WINDOW"
+#     for area in bpy.data.screens['Layout'].areas:
+#         if area.type == 'PROPERTIES': # 'VIEW_3D', 'CONSOLE', 'INFO' etc. 
+#             with bpy.context.temp_override(area=area):
+#                 # bpy.ops.screen.area_split(direction='VERTICAL', factor=0.5)
+#                 bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
+#                 area = bpy.context.window_manager.windows[-1].screen.areas[0]
+#                 area.type = 'NODE_EDITOR'
+#                 area.ui_type = 'CompositorNodeTree'
+#                 bpy.context.space_data.show_region_ui = True
+#                 bpy.ops.screen.header_toggle_menus()
+#                 bpy.context.space_data.show_region_header = False
                 
 
 class ViewModelOperator(Operator, AddObjectHelper):
